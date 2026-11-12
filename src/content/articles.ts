@@ -29,6 +29,20 @@ export interface Article {
 
 export const ARTICLES: readonly ArticleMeta[] = [
   {
+    slug: 'ai-agent-setup',
+    date: '2026-11-12',
+    title: {
+      en: 'Write the rules once, and four AI agents follow them',
+      vi: 'Viết quy tắc một lần, bốn AI agent cùng làm theo',
+    },
+    summary: {
+      en: 'How I set up a frontend repository so that Claude Code, Codex, Gemini CLI and Copilot all read one source of rules: AGENTS.md at the root, skills loaded on demand, three subagents with a model sized to each job, a hook that carries work across sessions, and a linter for the agent configuration itself.',
+      vi: 'Cách tôi cấu hình một repository frontend để Claude Code, Codex, Gemini CLI và Copilot cùng đọc một nguồn quy tắc: AGENTS.md làm gốc, skill tải theo nhu cầu, ba subagent chọn model theo việc, hook nối các phiên với nhau, và một linter cho chính cấu hình agent.',
+    },
+    tags: ['AI agents', 'Claude Code', 'Developer experience', 'Tooling'],
+    minutes: { en: 8, vi: 9 },
+  },
+  {
     slug: 'typescript-migration',
     date: '2026-11-12',
     title: {

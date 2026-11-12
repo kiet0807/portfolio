@@ -35,8 +35,13 @@ function inline(nodes: readonly Inline[], external: string): ReactNode {
 interface Labels {
   /** Screen-reader note for links that open a new tab. */
   external: string;
-  /** Name of the scrollable frame around a table. */
+  /** Start of the name of the scrollable frame around a table ("Table: <columns>"). */
   table: string;
+}
+
+/** Plain text of inline nodes. Kept here so the Markdown reader stays out of the initial bundle. */
+function textOf(nodes: readonly Inline[]): string {
+  return nodes.map((node) => ('children' in node ? textOf(node.children) : node.text)).join('');
 }
 
 function block(item: Block, key: number, labels: Labels): ReactNode {
@@ -75,9 +80,16 @@ function block(item: Block, key: number, labels: Labels): ReactNode {
       );
     case 'table':
       // On a narrow screen the table scrolls inside its frame, never the page. The frame is
-      // focusable so a keyboard can scroll it too.
+      // focusable so a keyboard can scroll it too, and named after its columns, so two tables
+      // on one page are two distinct regions.
       return (
-        <div key={key} className="table-wrap" role="region" aria-label={labels.table} tabIndex={0}>
+        <div
+          key={key}
+          className="table-wrap"
+          role="region"
+          aria-label={`${labels.table}: ${item.head.map(textOf).join(', ')}`}
+          tabIndex={0}
+        >
           <table>
             <thead>
               <tr>

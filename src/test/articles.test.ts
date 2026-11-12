@@ -22,8 +22,9 @@ describe('articles', () => {
     async (slug, lang) => {
       const source = await articleSource(slug, lang);
       expect(source.trim().length).toBeGreaterThan(200);
-      // The title comes from articles.ts; a "# " line would print it twice.
-      expect(source).not.toMatch(/^# /m);
+      // The title comes from articles.ts; a "# " line would print it twice. Code blocks may
+      // hold "# " lines of their own (Markdown files, shell comments), so they are left out.
+      expect(source.replace(/^```[\s\S]*?^```/gm, '')).not.toMatch(/^# /m);
       expect(findArticle(slug)?.minutes[lang]).toBe(readingMinutes(source));
     },
   );
