@@ -270,7 +270,7 @@ Thẻ canonical, Open Graph và sitemap cần URL tuyệt đối. Lúc build, UR
 
 1. biến môi trường `SITE_URL` (ví dụ `https://khoa.dev`);
 2. domain production mà Vercel tự cung cấp;
-3. giá trị `siteUrl` trong `profile.ts` (hiện là `https://kietnguyen.io.vn`; địa chỉ `kiet-nguyen-dev.vercel.app` của Vercel vẫn chạy song song).
+3. giá trị `siteUrl` trong `profile.ts` (hiện là `https://kietnguyen.io.vn`; địa chỉ `kiet-nguyen-dev.vercel.app` của Vercel chuyển hướng về tên miền này).
 
 Trên Vercel bạn thường không cần làm gì. Nếu deploy ở nơi khác, đặt `SITE_URL` trước khi build:
 

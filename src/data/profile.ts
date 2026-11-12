@@ -240,9 +240,11 @@ export interface Profile {
 /*    company is taken from the repositories.                          */
 /*  - What GBST's products are: the public pages on gbst.com.           */
 /*  - Job title and total years: confirmed by the owner.               */
-/*  - Outcomes at Onflow (release time halved, deploys from 8 minutes  */
-/*    to just over 3, hotfixes down to one or two): stated by the      */
-/*    owner, not measured from the repositories.                       */
+/*  - Outcomes at Onflow: release time halved and hotfixes down to     */
+/*    one or two are stated by the owner, not measured. Deploy time    */
+/*    is measured from the OMS repository's GitHub Actions history:    */
+/*    the staging pipeline's median went from 8.1 minutes (Create      */
+/*    React App, 18 runs) to 3.8 (Vite, from 20 Nov 2025, 238 runs).   */
 /*  - The share of AI-written code (about 80%): the owner's own        */
 /*    estimate. The agent guides (AGENTS.md, CLAUDE.md) are in three   */
 /*    of the Onflow repositories, added by the owner in 2026.          */
@@ -595,8 +597,8 @@ export const profile: Profile = {
           vi: 'Thiết lập quy trình phát triển có AI hỗ trợ: soạn bản hướng dẫn cho agent (AGENTS.md, CLAUDE.md) trong ba repository, xây dựng 7 skill dùng lại, 3 subagent và hook, chọn model theo từng tác vụ để tiết kiệm token; khoảng 80% code do AI agent viết nháp và 100% được review trước khi merge.',
         },
         {
-          en: 'Impact: release cycle 50% shorter, deployments over 50% faster, production hotfixes nearly eliminated.',
-          vi: 'Kết quả: rút ngắn 50% chu kỳ release, giảm hơn 50% thời gian deploy và gần như loại bỏ hotfix trên production.',
+          en: 'Impact: release cycle 50% shorter, deploy time cut from 8 to 3.8 minutes, production hotfixes nearly eliminated.',
+          vi: 'Kết quả: rút ngắn 50% chu kỳ release, deploy từ 8 phút còn 3,8 phút và gần như loại bỏ hotfix trên production.',
         },
       ],
       stack: ['React', 'TypeScript', 'Vite', 'TanStack Query', 'Vitest', 'Sentry'],
@@ -756,7 +758,7 @@ export const profile: Profile = {
       },
       metrics: [
         { value: '−50%', label: { en: 'release cycle', vi: 'chu kỳ release' } },
-        { value: '>50%', label: { en: 'faster deploys', vi: 'deploy nhanh hơn' } },
+        { value: '−53%', label: { en: 'deploy time', vi: 'thời gian deploy' } },
         {
           value: '2.1k',
           label: { en: 'TypeScript files, no JavaScript', vi: 'file TypeScript, không còn JavaScript' },
