@@ -103,7 +103,7 @@ JavaScript, có thẻ chia sẻ dạng bài viết và JSON-LD `BlogPosting`). �
    (230 từ một phút).
 
 Bài tự xuất hiện ở mục "Bài viết" trên trang chủ, trong sitemap, trong bảng lệnh (Ctrl/Cmd + K) và trong những gì Kai
-biết. Nội dung bài được tải riêng cho trang bài đó, không làm nặng trang chủ. Mục "Bài viết" không in ra giấy.
+biết, và có ảnh xem trước riêng mang tiêu đề bài khi chia sẻ đường dẫn (xem "Ảnh Open Graph"). Nội dung bài được tải riêng cho trang bài đó, không làm nặng trang chủ. Mục "Bài viết" không in ra giấy.
 
 Bài đăng ở nơi khác (Viblo, LinkedIn, bài nói) vẫn khai báo ở `profile.writing`; chúng mở trong tab mới.
 
@@ -143,8 +143,10 @@ avatar: { src: '/avatar.webp', width: 512, height: 512 },
 
 `public/og-en.png` và `public/og-vi.png` được **sinh tự động** từ `profile.ts` (tên, vị trí, tagline, nhãn `seo.ogLabel`) mỗi lần chạy `pnpm dev` hoặc `pnpm build`. Bạn không cần sửa tay.
 
-- Muốn đổi bố cục hoặc màu: sửa hàm `ogTree` trong [`scripts/generate-assets.mjs`](scripts/generate-assets.mjs), chạy `pnpm assets`, rồi mở file PNG để xem.
-- Sau khi deploy, Facebook và Zalo lưu cache ảnh cũ khá lâu. Dùng [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) để buộc tải lại.
+Mỗi bài viết có ảnh riêng cho từng ngôn ngữ, `public/og/<slug>-<lang>.png`, mang tiêu đề bài, thời gian đọc và tên tác giả; trang bài dùng ảnh này thay cho ảnh chung. Ảnh được sinh từ `src/content/articles.ts` cùng lúc, cỡ chữ tiêu đề tự chọn theo độ dài. Tiêu đề quá dài (không vừa ba dòng ở cỡ nhỏ nhất) thì script báo lỗi và yêu cầu rút gọn.
+
+- Muốn đổi bố cục hoặc màu: sửa hàm `ogFrame` (nền chung), `ogTree` (trang chủ) hoặc `articleOgTree` (bài viết) trong [`scripts/generate-assets.mjs`](scripts/generate-assets.mjs), chạy `pnpm assets`, rồi mở file PNG để xem.
+- Sau khi deploy, Facebook, LinkedIn và Zalo lưu cache ảnh cũ khá lâu. Dùng [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) hoặc [LinkedIn Post Inspector](https://www.linkedin.com/post-inspector/) để buộc tải lại.
 
 ### Favicon
 

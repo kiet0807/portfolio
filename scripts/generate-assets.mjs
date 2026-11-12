@@ -2,7 +2,8 @@
  * Generates every derived asset in public/ from src/data/profile.ts and the SVG sources:
  *   - fonts/            woff2, latin + vietnamese: Inter (text), Space Grotesk (headings)
  *                       and Playfair Display italic (the accent of the hero heading)
- *   - og-en.png, og-vi.png            1200×630 Open Graph images
+ *   - og-en.png, og-vi.png            1200×630 Open Graph images of the home page
+ *   - og/<slug>-<lang>.png            the same, one per article and language, with its title
  *   - favicon.ico (16, 32), apple-touch-icon.png (180), icon-192.png, icon-512.png
  *   - site.webmanifest
  * and, outside public/, server/knowledge.js: the profile as plain text, which is all the
@@ -12,7 +13,7 @@
  * Runs automatically before `pnpm dev` and `pnpm build`.
  */
 import { existsSync } from 'node:fs';
-import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { Resvg } from '@resvg/resvg-js';
 import satori from 'satori';
 import { runnerImport } from 'vite';
@@ -117,7 +118,8 @@ async function generateIcons() {
 
 const h = (type, style, children) => ({ type, props: { style, children } });
 
-function ogTree(profile, lang) {
+/** The shared backdrop: gradient, glow and the waves along the bottom, with `content` on top. */
+function ogFrame(content) {
   const wave = (d, fill, opacity) => ({
     type: 'svg',
     props: {
@@ -164,57 +166,137 @@ function ogTree(profile, lang) {
         0.7,
       ),
       wave('M0 156 C200 132 400 132 600 156 C800 180 1000 180 1200 156 L1200 190 L0 190 Z', COLORS.bg, 0.75),
-      // content
-      h('div', { display: 'flex', flexDirection: 'column', padding: '72px 80px', width: 1200, height: 630 }, [
-        h(
-          'div',
-          {
-            display: 'flex',
-            alignSelf: 'flex-start',
-            padding: '10px 24px',
-            borderRadius: 999,
-            border: `2px solid ${COLORS.accent}`,
-            color: COLORS.accent,
-            fontSize: 24,
-            fontWeight: 500,
-            letterSpacing: 3,
-            textTransform: 'uppercase',
-          },
-          profile.seo.ogLabel[lang],
-        ),
-        h(
-          'div',
-          {
-            display: 'flex',
-            marginTop: 44,
-            fontSize: 92,
-            fontWeight: 700,
-            lineHeight: 1.1,
-            color: '#FFFFFF',
-          },
-          profile.name,
-        ),
-        h(
-          'div',
-          { display: 'flex', marginTop: 14, fontSize: 42, fontWeight: 500, color: COLORS.accent },
-          profile.title[lang],
-        ),
-        h(
-          'div',
-          {
-            display: 'flex',
-            marginTop: 26,
-            maxWidth: 1040,
-            fontSize: 32,
-            fontWeight: 400,
-            lineHeight: 1.4,
-            color: COLORS.silver,
-          },
-          profile.tagline[lang],
-        ),
-      ]),
+      // Positioned, so the text is painted above the glow instead of being tinted by it.
+      h(
+        'div',
+        {
+          display: 'flex',
+          position: 'relative',
+          flexDirection: 'column',
+          padding: '72px 80px',
+          width: 1200,
+          height: 630,
+        },
+        content,
+      ),
     ],
   );
+}
+
+const ogPill = (label) =>
+  h(
+    'div',
+    {
+      display: 'flex',
+      alignSelf: 'flex-start',
+      padding: '10px 24px',
+      borderRadius: 999,
+      border: `2px solid ${COLORS.accent}`,
+      color: COLORS.accent,
+      fontSize: 24,
+      fontWeight: 500,
+      letterSpacing: 3,
+      textTransform: 'uppercase',
+    },
+    label,
+  );
+
+function ogTree(profile, lang) {
+  return ogFrame([
+    ogPill(profile.seo.ogLabel[lang]),
+    h(
+      'div',
+      {
+        display: 'flex',
+        marginTop: 44,
+        fontSize: 92,
+        fontWeight: 700,
+        lineHeight: 1.1,
+        color: '#FFFFFF',
+      },
+      profile.name,
+    ),
+    h(
+      'div',
+      { display: 'flex', marginTop: 14, fontSize: 42, fontWeight: 500, color: COLORS.accent },
+      profile.title[lang],
+    ),
+    h(
+      'div',
+      {
+        display: 'flex',
+        marginTop: 26,
+        maxWidth: 1040,
+        fontSize: 32,
+        fontWeight: 400,
+        lineHeight: 1.4,
+        color: COLORS.silver,
+      },
+      profile.tagline[lang],
+    ),
+  ]);
+}
+
+/** Room for an article title above the waves: 1040 px wide, at most this tall. */
+const OG_TITLE = { width: 1040, height: 236, lineHeight: 1.16, sizes: [76, 68, 60, 54, 48] };
+
+/**
+ * The largest title size that stays within OG_TITLE. Lines are estimated from an average
+ * glyph width of 0.56 em in the bold display face, wrapping at spaces as the renderer does.
+ */
+function ogTitleSize(title) {
+  const fits = (size) => {
+    const perLine = Math.floor(OG_TITLE.width / (size * 0.56));
+    let lines = 1;
+    let used = 0;
+    for (const word of title.split(' ')) {
+      const next = used === 0 ? word.length : used + 1 + word.length;
+      if (next > perLine && used > 0) {
+        lines += 1;
+        used = word.length;
+      } else {
+        used = next;
+      }
+    }
+    return lines * size * OG_TITLE.lineHeight <= OG_TITLE.height;
+  };
+  const size = OG_TITLE.sizes.find(fits);
+  if (!size) throw new Error(`Open Graph image: the title "${title}" is too long to fit. Shorten it.`);
+  return size;
+}
+
+function articleOgTree(profile, article, lang, t) {
+  const title = article.title[lang];
+  const reading = `${article.minutes[lang]} ${t(lang, 'unit.minutes')} ${t(lang, 'article.read')}`;
+  return ogFrame([
+    h('div', { display: 'flex', alignItems: 'center' }, [
+      ogPill(t(lang, 'writing.article')),
+      h(
+        'div',
+        { display: 'flex', marginLeft: 24, fontSize: 26, fontWeight: 500, color: COLORS.silver },
+        reading,
+      ),
+    ]),
+    h(
+      'div',
+      {
+        display: 'flex',
+        marginTop: 38,
+        maxWidth: OG_TITLE.width,
+        fontSize: ogTitleSize(title),
+        fontWeight: 700,
+        lineHeight: OG_TITLE.lineHeight,
+        textWrap: 'balance',
+        color: '#FFFFFF',
+      },
+      title,
+    ),
+    h('div', { display: 'flex', alignItems: 'center', marginTop: 26, fontSize: 30 }, [
+      h('div', { display: 'flex', fontWeight: 700, color: COLORS.accent }, profile.name),
+      h('div', { display: 'flex', margin: '0 14px', color: COLORS.silver }, '·'),
+      h('div', { display: 'flex', fontWeight: 400, color: COLORS.silver }, profile.title[lang]),
+    ]),
+  ]);
 }
 
 async function loadOgFonts() {
@@ -234,14 +316,24 @@ async function loadOgFonts() {
   return fonts;
 }
 
-async function generateOg(profile) {
+async function generateOg(profile, articles, t) {
   const fonts = await loadOgFonts();
   const results = [];
-  for (const lang of ['en', 'vi']) {
-    const svg = await satori(ogTree(profile, lang), { width: 1200, height: 630, fonts });
+  const emit = async (file, tree) => {
+    const svg = await satori(tree, { width: 1200, height: 630, fonts });
     const png = renderSvg(svg, 1200);
-    await writeFile(fromRoot(`public/og-${lang}.png`), png);
-    results.push({ file: `og-${lang}.png`, png });
+    await writeFile(fromRoot('public', file), png);
+    results.push({ file, png });
+  };
+  // Start the article folder empty, so a renamed or removed article leaves no image behind.
+  await rm(fromRoot('public/og'), { recursive: true, force: true });
+  await mkdir(fromRoot('public/og'), { recursive: true });
+  for (const lang of ['en', 'vi']) {
+    await emit(`og-${lang}.png`, ogTree(profile, lang));
+    for (const article of articles) {
+      // The path is what articleOgPath() in src/content/articles.ts points the page's head at.
+      await emit(`og/${article.slug}-${lang}.png`, articleOgTree(profile, article, lang, t));
+    }
   }
   return results;
 }
@@ -416,14 +508,15 @@ const knowledgeSize = await generateKnowledge(profile, articleModule.ARTICLES);
 await mkdir(PUBLIC, { recursive: true });
 await copyFonts();
 await generateIcons();
-const og = await generateOg(profile);
+const { module: dictionaryModule } = await runnerImport('/src/i18n/dictionary.ts', { logLevel: 'error' });
+const og = await generateOg(profile, articleModule.ARTICLES, dictionaryModule.t);
 await generateManifest(profile);
 const cvs = await ensureCvPlaceholders();
 
 console.log('Generated assets in public/:');
 for (const { file, png } of og) {
   const { width, height } = pngSize(png);
-  console.log(`  ${file.padEnd(22)} ${width}×${height}  ${kb(png.length)}`);
+  console.log(`  ${file.padEnd(30)} ${width}×${height}  ${kb(png.length)}`);
 }
 for (const file of ['apple-touch-icon.png', 'icon-192.png', 'icon-512.png']) {
   const png = await readFile(fromRoot('public', file));

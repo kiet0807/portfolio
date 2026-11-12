@@ -34,6 +34,15 @@ describe('renderHead', () => {
     expect(head).toContain('<meta property="og:type" content="article" />');
     expect(head).toContain(`<meta property="article:published_time" content="${article.date}" />`);
     expect(head).toContain('"@type":"BlogPosting"');
+    // Shared links show the article's own image, not the profile's.
+    const image = `${siteUrl}/og/${article.slug}-${lang}.png`;
+    expect(head).toContain(`<meta property="og:image" content="${image}" />`);
+    expect(head).toContain(`<meta name="twitter:image" content="${image}" />`);
+    expect(head).toContain(`"image":"${image}"`);
+    expect(head).toContain(
+      `<meta property="og:image:alt" content="${article.title[lang]} · ${profile.name}" />`,
+    );
+    expect(head).not.toContain(`/og-${lang}.png`);
     // The article page describes the article; the full profile (Person) is the home page's.
     expect(head).not.toContain('knowsAbout');
   });

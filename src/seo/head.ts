@@ -1,5 +1,5 @@
 import { siteUrl } from './siteUrl';
-import { articlePath, findArticle, type ArticleMeta } from '@/content/articles';
+import { articleOgPath, articlePath, findArticle, type ArticleMeta } from '@/content/articles';
 import { allSkills, profile } from '@/data/profile';
 import { t } from '@/i18n/dictionary';
 import { LANGS, type Lang } from '@/i18n/types';
@@ -82,7 +82,7 @@ function articleJsonLd(article: ArticleMeta, lang: Lang): string {
     keywords: article.tags.join(', '),
     url,
     mainEntityOfPage: url,
-    image: `${siteUrl}/og-${lang}.png`,
+    image: `${siteUrl}${articleOgPath(lang, article.slug)}`,
     author: person(lang),
   });
 }
@@ -97,7 +97,11 @@ export function renderHead(route: Route): string {
   const title = pageTitle(route);
   const description = pageDescription(route);
   const url = `${siteUrl}${pathFor(route, lang)}`;
-  const og = `${siteUrl}/og-${lang}.png`;
+  // An article is shared with an image that carries its own title; every other page with the profile's.
+  const og = `${siteUrl}${article ? articleOgPath(lang, article.slug) : `/og-${lang}.png`}`;
+  const ogAlt = article
+    ? `${article.title[lang]} · ${profile.name}`
+    : `${profile.name} · ${profile.title[lang]}`;
   const other: Lang = lang === 'en' ? 'vi' : 'en';
 
   const lines: string[] = [
@@ -128,7 +132,7 @@ export function renderHead(route: Route): string {
     '<meta property="og:image:type" content="image/png" />',
     '<meta property="og:image:width" content="1200" />',
     '<meta property="og:image:height" content="630" />',
-    `<meta property="og:image:alt" content="${esc(`${profile.name} · ${profile.title[lang]}`)}" />`,
+    `<meta property="og:image:alt" content="${esc(ogAlt)}" />`,
   );
   if (article) {
     lines.push(
@@ -142,6 +146,7 @@ export function renderHead(route: Route): string {
     `<meta name="twitter:title" content="${esc(article ? article.title[lang] : title)}" />`,
     `<meta name="twitter:description" content="${esc(description)}" />`,
     `<meta name="twitter:image" content="${og}" />`,
+    `<meta name="twitter:image:alt" content="${esc(ogAlt)}" />`,
   );
 
   // Above-the-fold fonts: body text and the thin display heading with its Vietnamese glyphs.

@@ -305,6 +305,10 @@ await check('generated images and icons are served with the right dimensions', a
   const expected = {
     'og-en.png': [1200, 630],
     'og-vi.png': [1200, 630],
+    // One link-preview image per article and language.
+    ...Object.fromEntries(
+      ARTICLES.flatMap((slug) => LANGS.map((lang) => [`og/${slug}-${lang}.png`, [1200, 630]])),
+    ),
     'apple-touch-icon.png': [180, 180],
     'icon-192.png': [192, 192],
     'icon-512.png': [512, 512],
@@ -1349,6 +1353,12 @@ for (const [index, slug] of ARTICLES.entries()) {
       assert(
         html.includes(`hreflang="${lang === 'en' ? 'vi' : 'en'}" href="`),
         `${path}: no link to the other language`,
+      );
+      // A shared link shows the article's own image (served and sized: see the HTTP checks).
+      const image = new RegExp(`content="https?://[^"]+/og/${slug}-${lang}\\.png"`, 'g');
+      assert(
+        (html.match(image) ?? []).length === 2,
+        `${path}: og:image and twitter:image should both be the article's own image`,
       );
 
       // The Writing section of the home page links to it.
