@@ -1,0 +1,10 @@
+dist
+dist-ssr
+node_modules
+pnpm-lock.yaml
+public/*.png
+public/*.ico
+.lighthouse
+.cv
+private
+server/knowledge.js

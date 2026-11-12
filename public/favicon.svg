@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#12306B"/>
+      <stop offset="0.55" stop-color="#0B1F3A"/>
+      <stop offset="1" stop-color="#0A0F1A"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.82" cy="0.14" r="0.75">
+      <stop offset="0" stop-color="#22D3EE" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#22D3EE" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="clip">
+      <use href="#tile"/>
+    </clipPath>
+    <linearGradient id="stem" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#60A5FA"/>
+      <stop offset="1" stop-color="#2563EB"/>
+    </linearGradient>
+    <linearGradient id="arm" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#A5F3FC"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+  </defs>
+  <rect id="tile" width="64" height="64" rx="14" fill="url(#bg)"/>
+  <!-- The glow is clipped by the tile, so it follows whatever corner radius the tile has. -->
+  <rect width="64" height="64" fill="url(#glow)" clip-path="url(#clip)"/>
+  <!-- K as a stem and a code chevron -->
+  <rect x="15" y="14" width="8" height="36" rx="1.5" fill="url(#stem)"/>
+  <path d="M46 14 29 32l17 18" fill="none" stroke="url(#arm)" stroke-width="8" stroke-linejoin="miter" stroke-miterlimit="6"/>
+  <!-- signal node -->
+  <circle cx="51" cy="32" r="3.5" fill="#FFFFFF"/>
+</svg>

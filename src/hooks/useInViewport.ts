@@ -1,0 +1,19 @@
+import { useEffect, useState, type RefObject } from 'react';
+
+/** True while the element intersects the viewport (assumed visible until measured). */
+export function useInViewport(ref: RefObject<Element | null>, rootMargin = '0px'): boolean {
+  const [inView, setInView] = useState(true);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry) setInView(entry.isIntersecting);
+      },
+      { rootMargin },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [ref, rootMargin]);
+  return inView;
+}
