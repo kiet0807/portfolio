@@ -254,7 +254,7 @@ export interface Profile {
 /* ------------------------------------------------------------------ */
 
 export const profile: Profile = {
-  siteUrl: 'https://kiet-nguyen-dev.vercel.app',
+  siteUrl: 'https://kietnguyen.io.vn',
   name: 'Kiệt Nguyễn',
   givenName: 'Kiệt',
   title: { en: 'Senior Frontend Developer', vi: 'Senior Frontend Developer' },

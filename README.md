@@ -2,7 +2,7 @@
 
 Trang portfolio một trang cho frontend developer: React 19, TypeScript, Vite 8, Tailwind CSS 4, Motion và React Three Fiber. Mỗi ngôn ngữ có URL riêng (`/en`, `/vi`), được prerender thành HTML tĩnh, nên link chia sẻ lên Facebook, LinkedIn, Zalo hiện đúng tiêu đề, mô tả và ảnh mà không cần chạy JavaScript.
 
-Bản đang chạy: **https://kiet-nguyen-dev.vercel.app**. Toàn bộ nội dung (hồ sơ, kinh nghiệm, dự án, CV) nằm trong một file: [`src/data/profile.ts`](src/data/profile.ts).
+Bản đang chạy: **https://kietnguyen.io.vn**. Toàn bộ nội dung (hồ sơ, kinh nghiệm, dự án, CV) nằm trong một file: [`src/data/profile.ts`](src/data/profile.ts).
 
 ## Chạy dự án
 
@@ -270,7 +270,7 @@ Thẻ canonical, Open Graph và sitemap cần URL tuyệt đối. Lúc build, UR
 
 1. biến môi trường `SITE_URL` (ví dụ `https://khoa.dev`);
 2. domain production mà Vercel tự cung cấp;
-3. giá trị `siteUrl` trong `profile.ts` (hiện là `https://kiet-nguyen-dev.vercel.app`, tên miền miễn phí của Vercel; đổi khi có tên miền riêng).
+3. giá trị `siteUrl` trong `profile.ts` (hiện là `https://kietnguyen.io.vn`; địa chỉ `kiet-nguyen-dev.vercel.app` của Vercel vẫn chạy song song).
 
 Trên Vercel bạn thường không cần làm gì. Nếu deploy ở nơi khác, đặt `SITE_URL` trước khi build:
 
