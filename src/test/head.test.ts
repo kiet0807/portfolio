@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ARTICLES } from '@/content/articles';
 import { profile } from '@/data/profile';
 import { renderHead } from '@/seo/head';
 import { siteUrl } from '@/seo/siteUrl';
@@ -15,6 +16,26 @@ describe('renderHead', () => {
     expect(head).toContain(`<meta property="og:image" content="${siteUrl}/og-${lang}.png" />`);
     expect(head).toContain(`<meta property="og:locale" content="${lang === 'vi' ? 'vi_VN' : 'en_US'}" />`);
     expect(head).toContain('application/ld+json');
+  });
+
+  it.each(['en', 'vi'] as const)('describes an article as an article on /%s/writing/…', (lang) => {
+    const [article] = ARTICLES;
+    if (!article) return;
+    const url = `${siteUrl}/${lang}/writing/${article.slug}`;
+    const head = renderHead({ kind: 'article', lang, slug: article.slug });
+    expect(head).toContain(`<title>${article.title[lang]} · ${profile.name}</title>`);
+    expect(head).toContain(`<link rel="canonical" href="${url}" />`);
+    expect(head).toContain(
+      `<link rel="alternate" hreflang="en" href="${siteUrl}/en/writing/${article.slug}" />`,
+    );
+    expect(head).toContain(
+      `<link rel="alternate" hreflang="vi" href="${siteUrl}/vi/writing/${article.slug}" />`,
+    );
+    expect(head).toContain('<meta property="og:type" content="article" />');
+    expect(head).toContain(`<meta property="article:published_time" content="${article.date}" />`);
+    expect(head).toContain('"@type":"BlogPosting"');
+    // The article page describes the article; the full profile (Person) is the home page's.
+    expect(head).not.toContain('knowsAbout');
   });
 
   it('keeps the 404 page out of search indexes', () => {

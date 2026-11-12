@@ -89,6 +89,24 @@ Menu, nút, tiêu đề section, trang 404 nằm ở đây. Để thêm một ch
 2. Thêm đúng key đó vào object `vi`. Nếu quên, TypeScript báo lỗi tại `vi`.
 3. Dùng trong component: `const { t } = useLang();` rồi `t('ten.key')`.
 
+### Bài viết: `src/content/`
+
+Mỗi bài có trang riêng ở `/en/writing/<slug>` và `/vi/writing/<slug>`, được prerender thành HTML tĩnh (đọc được khi tắt
+JavaScript, có thẻ chia sẻ dạng bài viết và JSON-LD `BlogPosting`). Để thêm một bài:
+
+1. Viết nội dung vào `src/content/writing/<slug>.vi.md` và `<slug>.en.md`. Không có dòng tiêu đề `# ...`: tiêu đề đặt
+   ở bước 2. Hỗ trợ: `##` và `###`, đoạn văn, danh sách `-` và `1.`, trích dẫn `>`, khối code, **đậm**, _nghiêng_,
+   `code` và [liên kết](https://...). Liên kết chỉ nhận `https://`, đường dẫn bắt đầu bằng `/`, hoặc `#`.
+2. Thêm một mục vào đầu mảng `ARTICLES` trong `src/content/articles.ts`: slug, ngày, tiêu đề, tóm tắt, chủ đề, thời
+   gian đọc.
+3. Chạy `pnpm test`: test báo nếu thiếu một ngôn ngữ, còn dòng `#`, hoặc thời gian đọc không khớp với nội dung
+   (230 từ một phút).
+
+Bài tự xuất hiện ở mục "Bài viết" trên trang chủ, trong sitemap, trong bảng lệnh (Ctrl/Cmd + K) và trong những gì Kai
+biết. Nội dung bài được tải riêng cho trang bài đó, không làm nặng trang chủ. Mục "Bài viết" không in ra giấy.
+
+Bài đăng ở nơi khác (Viblo, LinkedIn, bài nói) vẫn khai báo ở `profile.writing`; chúng mở trong tab mới.
+
 ### CV
 
 Hai file `public/cv-en.pdf` và `public/cv-vi.pdf` có bố cục CV riêng (dải tiêu đề tối có ảnh và thông tin liên hệ, các mục đánh số, kinh nghiệm dạng timeline), nhưng nội dung lấy thẳng từ `profile.ts`, nên CV luôn khớp với trang. Sau khi sửa `profile.ts`:
@@ -274,34 +292,36 @@ Vercel tự phục vụ `dist/404.html` với mã trạng thái 404 cho mọi đ
 ├─ public/                 favicon.svg, avatar.webp, 404-illustration.svg, CV (các file khác được sinh tự động)
 └─ src/
    ├─ data/profile.ts      NỘI DUNG: sửa ở đây
+   ├─ content/             bài viết: articles.ts (danh sách) và writing/*.md (nội dung)
    ├─ i18n/                từ điển giao diện, logic chọn và chuyển ngôn ngữ
    ├─ theme/               dark/light, script chống nháy màu
    ├─ seo/                 thẻ meta, Open Graph, hreflang, JSON-LD
    ├─ components/          layout, hero (3D), sections, assistant (bot hướng dẫn), ui
    ├─ hooks/               vị trí cuộn, vệt sáng con trỏ, chỉ số đo trực tiếp, đồng hồ, bảng lệnh
-   ├─ lib/                 phát hiện máy yếu, tính contrast, công thức Web Vitals, tìm kiếm không dấu
-   ├─ pages/               Page (trang chính), NotFound (404)
+   ├─ lib/                 phát hiện máy yếu, tính contrast, công thức Web Vitals, tìm kiếm không dấu, đọc Markdown
+   ├─ pages/               Page (trang chính), ArticlePage (trang bài viết), NotFound (404)
    └─ test/                unit test, test a11y, test contrast
 ```
 
 ## Kết quả đã đo
 
-Đo ngày 11/11/2026 trên bản build production, chạy cục bộ (macOS, Apple M4, Chrome, Node 24), nội dung thật trong `profile.ts`. Kết quả sau khi deploy có thể khác theo mạng và máy chủ; chạy lại `pnpm qa` và `pnpm lighthouse` để có số của bạn.
+Đo ngày 12/11/2026 trên bản build production, chạy cục bộ (macOS, Apple M4, Chrome, Node 24), nội dung thật trong `profile.ts`. Kết quả sau khi deploy có thể khác theo mạng và máy chủ; chạy lại `pnpm qa` và `pnpm lighthouse` để có số của bạn.
 
-| Hạng mục                                           | Kết quả                                                                                                      |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `pnpm typecheck`, `pnpm lint`, `pnpm format:check` | Đạt, 0 lỗi, 0 warning                                                                                        |
-| `pnpm test`                                        | 109/109 test đạt                                                                                             |
-| `pnpm build`                                       | Đạt, không warning                                                                                           |
-| JS tải ban đầu                                     | 133.7 KB gzip (ngân sách 150 KB). Tải lười: chunk 3D 232.3 KB, bảng lệnh 2.7 KB, bảng chat 2.7 KB            |
-| `pnpm qa`                                          | 77/77 kiểm tra đạt, ở 6 độ rộng từ 360px đến 2560px. Phần AI của chatbot chạy với một máy chủ giả lập Gemini |
-| Lighthouse mobile `/en`                            | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                           |
-| Lighthouse mobile `/vi`                            | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                           |
-| In trang (Ctrl/Cmd + P)                            | 4 trang A4 mỗi ngôn ngữ, nền sáng, không còn phần nào bị ẩn                                                  |
-| `pnpm cv`                                          | 2 trang A4 mỗi ngôn ngữ, cỡ chữ 8pt ở cả hai bản                                                             |
-| Chế độ tương phản cao (giả lập)                    | Nút có viền, mục đang chọn phân biệt được                                                                    |
+| Hạng mục                                           | Kết quả                                                                                                                                             |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm typecheck`, `pnpm lint`, `pnpm format:check` | Đạt, 0 lỗi, 0 warning                                                                                                                               |
+| `pnpm test`                                        | 129/129 test đạt                                                                                                                                    |
+| `pnpm build`                                       | Đạt, không warning                                                                                                                                  |
+| JS tải ban đầu                                     | 138.2 KB gzip (ngân sách 150 KB). Tải lười: chunk 3D 232.3 KB, bảng chat 3.4 KB, bảng lệnh 2.7 KB, mỗi bài viết khoảng 3 KB, bộ đọc Markdown 1.2 KB |
+| `pnpm qa`                                          | 79/79 kiểm tra đạt, ở 6 độ rộng từ 360px đến 2560px. Phần AI của chatbot chạy với một máy chủ giả lập Gemini                                        |
+| Lighthouse mobile `/en`                            | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                  |
+| Lighthouse mobile `/vi`                            | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                  |
+| Lighthouse mobile trang bài viết (`/vi/writing/…`) | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                  |
+| In trang (Ctrl/Cmd + P)                            | 4 trang A4 mỗi ngôn ngữ, nền sáng, không còn phần nào bị ẩn                                                                                         |
+| `pnpm cv`                                          | 2 trang A4 mỗi ngôn ngữ, cỡ chữ 8pt ở cả hai bản                                                                                                    |
+| Chế độ tương phản cao (giả lập)                    | Nút có viền, mục đang chọn phân biệt được                                                                                                           |
 
-Chưa kiểm tra: trình duyệt Safari và Firefox, thiết bị di động thật, trình đọc màn hình thật, máy in thật, chế độ tương phản cao trên Windows thật, và bản đã deploy trên Vercel. Phần in và tương phản cao mới chỉ được kiểm tra bằng chế độ giả lập của Chrome.
+Chưa kiểm tra: trình duyệt Safari và Firefox, thiết bị di động thật, trình đọc màn hình thật, máy in thật và chế độ tương phản cao trên Windows thật. Phần in và tương phản cao mới chỉ được kiểm tra bằng chế độ giả lập của Chrome.
 
 ## Ghi chú phiên bản
 

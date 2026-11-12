@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { mockMatchMedia } from './setup';
 import { App } from '@/App';
+import { ARTICLES, articlePath, loadArticle } from '@/content/articles';
 import { allSkills, profile } from '@/data/profile';
 import { t } from '@/i18n/dictionary';
 import { STORAGE_KEYS } from '@/lib/storage';
@@ -182,7 +183,7 @@ describe('profile-driven content', () => {
     renderPage('en');
     const writing = screen.queryByRole('heading', { level: 2, name: t('en', 'section.writing') });
     const quotes = screen.queryByRole('heading', { level: 2, name: t('en', 'section.testimonials') });
-    expect(writing !== null).toBe(profile.writing.length > 0);
+    expect(writing !== null).toBe(ARTICLES.length > 0 || profile.writing.length > 0);
     expect(quotes !== null).toBe(profile.testimonials.length > 0);
   });
 });
@@ -359,4 +360,41 @@ describe('404 page', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(t(lang, 'notFound.title'));
     expect(screen.getByRole('link', { name: t(lang, 'notFound.home') })).toHaveAttribute('href', `/${lang}`);
   });
+});
+
+describe('articles', () => {
+  it('lists each article in the Writing section, linking to its own page', () => {
+    renderPage('vi');
+    const section = document.getElementById('writing');
+    expect(section).not.toBeNull();
+    if (!section) return;
+    for (const article of ARTICLES) {
+      const link = within(section).getByRole('link', { name: article.title.vi });
+      expect(link).toHaveAttribute('href', articlePath('vi', article.slug));
+      expect(link).not.toHaveAttribute('target');
+    }
+  });
+
+  it.each(['en', 'vi'] as const)(
+    'renders an article page in %s with its title, contents and author',
+    async (lang) => {
+      const [meta] = ARTICLES;
+      if (!meta) return;
+      const article = await loadArticle(meta.slug, lang);
+      render(<App route={{ kind: 'article', lang, slug: meta.slug }} article={article} />);
+      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(meta.title[lang]);
+      const toc = screen.getByRole('navigation', { name: t(lang, 'article.toc') });
+      const headings = article.blocks.filter((block) => block.kind === 'heading' && block.level === 2);
+      expect(within(toc).getAllByRole('link')).toHaveLength(headings.length);
+      for (const link of within(toc).getAllByRole('link')) {
+        const id = link.getAttribute('href')?.slice(1) ?? '';
+        expect(document.getElementById(id), id).not.toBeNull();
+      }
+      expect(screen.getByRole('complementary', { name: t(lang, 'article.author') })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: t(lang, 'article.all') })).toHaveAttribute(
+        'href',
+        `/${lang}#writing`,
+      );
+    },
+  );
 });

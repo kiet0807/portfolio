@@ -9,11 +9,13 @@ interface SectionProps {
   title: string;
   /** Alternate background band. */
   tinted?: boolean;
+  /** Extra classes for the <section>, e.g. `print:hidden`. */
+  className?: string;
   children: ReactNode;
 }
 
 /** Shared section shell: landmark, numbered heading, blueprint backdrop and vertical rhythm. */
-export function Section({ id, kicker, title, tinted = false, children }: SectionProps) {
+export function Section({ id, kicker, title, tinted = false, className, children }: SectionProps) {
   const headingId = `${id}-title`;
   return (
     <section
@@ -22,6 +24,7 @@ export function Section({ id, kicker, title, tinted = false, children }: Section
       className={cn(
         'relative isolate overflow-hidden py-20 sm:py-28 print:py-3',
         tinted && 'bg-surface-2/50',
+        className,
       )}
     >
       <div

@@ -43,8 +43,19 @@ const field = (pattern) => pattern.exec(profileSource)?.[1] ?? '';
 const EMAIL = field(/email: '([^']+)'/);
 const NAME = field(/\n {2}name: '([^']+)'/);
 const AVAILABLE = /availability: \{\s*open: true/.test(profileSource);
-// The feedback band is one more <section> in <main>, shown only when there is feedback.
-const MAIN_SECTIONS = 6 + (/\btestimonials: \[\]/.test(profileSource) ? 0 : 1);
+// Articles live in their own file; the Writing section appears when there is one, or when
+// profile.writing lists work published elsewhere.
+const articlesSource = await readFile(fromRoot('src/content/articles.ts'), 'utf8');
+const ARTICLES = [...articlesSource.matchAll(/\n {4}slug: '([^']+)'/g)].map((m) => m[1]);
+const ARTICLE_TITLES = [...articlesSource.matchAll(/\n {4}title: \{\s*en: '([^']+)',\s*vi: '([^']+)'/g)].map(
+  (m) => ({ en: m[1], vi: m[2] }),
+);
+const HAS_WRITING = ARTICLES.length > 0 || !/\bwriting: \[\]/.test(profileSource);
+// Numbered sections: About, Skills, Experience, Projects, [Writing], Contact.
+const SECTION_TOTAL = String(5 + (HAS_WRITING ? 1 : 0)).padStart(2, '0');
+// <section> elements in <main>: the hero and the numbered sections, plus the feedback band
+// when there is feedback.
+const MAIN_SECTIONS = 1 + Number(SECTION_TOTAL) + (/\btestimonials: \[\]/.test(profileSource) ? 0 : 1);
 const AVAILABILITY_EN = field(/availability: \{\s*open: \w+,\s*label: \{ en: '([^']+)'/);
 const SOCIALS = [...profileSource.matchAll(/\{ id: '\w+', label: '([^']+)', url:/g)].map((m) => m[1]);
 const STAT_COUNT = (/\n {2}stats: \[([\s\S]*?)\n {2}\],/.exec(profileSource)?.[1].match(/\n {6}id: '/g) ?? [])
@@ -274,6 +285,15 @@ await check('unknown URL returns the 404 page with HTTP status 404', async () =>
   assert(res.status === 404, `status ${res.status}`);
   assert(html.includes(TEXT.en.notFound) && html.includes(TEXT.vi.notFound), '404 copy missing');
   assert(html.includes('name="robots" content="noindex"'), '404 should be noindex');
+});
+
+await check('an unknown article returns the 404 page', async () => {
+  for (const path of ['/en/writing/no-such-article', '/vi/writing', '/en/writing/']) {
+    const res = await fetch(`${BASE}${path}`, { redirect: 'manual' });
+    // "/en/writing/" first redirects to "/en/writing" (no trailing slash), which is a 404.
+    const final = res.status === 308 ? await fetch(`${BASE}${res.headers.get('location')}`) : res;
+    assert(final.status === 404, `${path}: status ${final.status}`);
+  }
 });
 
 await check('/en/ redirects to /en (no trailing slash)', async () => {
@@ -910,7 +930,10 @@ await check(
         state.frameHeights.every((h) => h > 100),
         `wireframe heights: ${state.frameHeights.join()}`,
       );
-      assert(state.numerals === '01,02,03,04,05', `section numerals: ${state.numerals}`);
+      const numerals = Array.from({ length: Number(SECTION_TOTAL) }, (_, i) =>
+        String(i + 1).padStart(2, '0'),
+      ).join();
+      assert(state.numerals === numerals, `section numerals: ${state.numerals}`);
       assert(problems.length === 0, problems.join('\n'));
     } finally {
       await close();
@@ -1258,7 +1281,7 @@ await check('status bar: follows the section and scroll position, stays out of t
     const top = await read();
     assert(top.hidden && top.tabbable === 0, 'the bar must be decorative: aria-hidden and not focusable');
     assert(top.pinned, 'the bar is not pinned to the bottom edge');
-    assert(top.section === `00/05 ${NAME}`, `at the top the bar shows "${top.section}"`);
+    assert(top.section === `00/${SECTION_TOTAL} ${NAME}`, `at the top the bar shows "${top.section}"`);
     assert(top.text.includes('1280×800'), `window size readout missing: ${top.text}`);
     assert(top.clock === top.pageClock && /^\d\d:\d\d GMT/.test(top.clock), `clock shows "${top.clock}"`);
     if (AVAILABLE) assert(top.text.includes(AVAILABILITY_EN), 'availability label missing');
@@ -1267,11 +1290,15 @@ await check('status bar: follows the section and scroll position, stays out of t
       document.getElementById('projects').scrollIntoView({ behavior: 'instant', block: 'start' }),
     );
     await page.waitForFunction(
-      () => document.querySelector('[data-status-section]').textContent.includes('04/05'),
+      (label) => document.querySelector('[data-status-section]').textContent.includes(label),
       { timeout: 3000 },
+      `04/${SECTION_TOTAL}`,
     );
     const middle = await read();
-    assert(middle.section === '04/05 Projects', `in Projects the bar shows "${middle.section}"`);
+    assert(
+      middle.section === `04/${SECTION_TOTAL} Projects`,
+      `in Projects the bar shows "${middle.section}"`,
+    );
 
     await page.evaluate(() =>
       window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }),
@@ -1285,11 +1312,15 @@ await check('status bar: follows the section and scroll position, stays out of t
 
     // Jumping straight between the two ends of the page crosses no section boundary slowly
     // enough to be seen; the bar must still know where it is.
-    assert(bottom.section === '05/05 Contact', `at the end of the page the bar shows "${bottom.section}"`);
+    assert(
+      bottom.section === `${SECTION_TOTAL}/${SECTION_TOTAL} Contact`,
+      `at the end of the page the bar shows "${bottom.section}"`,
+    );
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
     await page.waitForFunction(
-      () => document.querySelector('[data-status-section]').textContent.includes('00/05'),
+      (label) => document.querySelector('[data-status-section]').textContent.includes(label),
       { timeout: 3000 },
+      `00/${SECTION_TOTAL}`,
     );
     assert(problems.length === 0, problems.join('\n'));
     return top.pct === null ? 'scroll readout unsupported in this browser' : undefined;
@@ -1297,6 +1328,99 @@ await check('status bar: follows the section and scroll position, stays out of t
     await close();
   }
 });
+
+for (const [index, slug] of ARTICLES.entries()) {
+  await check(`article "${slug}": prerendered, linked from Writing, readable at every width`, async () => {
+    for (const lang of LANGS) {
+      const path = `/${lang}/writing/${slug}`;
+      const title = ARTICLE_TITLES[index]?.[lang] ?? '';
+
+      // Without JavaScript: the whole text is in the HTML, with article metadata for previews.
+      const html = await (await fetch(`${BASE}${path}`)).text();
+      assert(
+        html.includes(`<h1 id="article-title"`) && html.includes(title),
+        `${path}: title missing from the HTML`,
+      );
+      assert(html.includes('"@type":"BlogPosting"'), `${path}: BlogPosting JSON-LD missing`);
+      assert(
+        html.includes('<meta property="og:type" content="article" />'),
+        `${path}: og:type is not article`,
+      );
+      assert(
+        html.includes(`hreflang="${lang === 'en' ? 'vi' : 'en'}" href="`),
+        `${path}: no link to the other language`,
+      );
+
+      // The Writing section of the home page links to it.
+      const home = await (await fetch(`${BASE}/${lang}`)).text();
+      assert(home.includes(`href="${path}"`), `/${lang} does not link to ${path}`);
+
+      for (const width of [360, 1280]) {
+        const { page, problems, close } = await open(path, { width, height: 800 });
+        try {
+          const state = await page.evaluate(() => ({
+            h1: document.querySelector('h1')?.textContent ?? '',
+            overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+            sections: [...document.querySelectorAll('[data-article-section]')].map((el) => el.id),
+            toc: [...document.querySelectorAll('nav[aria-labelledby="article-toc"] a')].map((a) =>
+              a.getAttribute('href'),
+            ),
+            tocVisible:
+              getComputedStyle(document.querySelector('nav[aria-labelledby="article-toc"]')).display !==
+              'none',
+            canonical: document.querySelector('link[rel="canonical"]')?.getAttribute('href') ?? '',
+            title: document.title,
+          }));
+          assert(state.h1 === title, `${path} at ${width}px: h1 is "${state.h1}"`);
+          assert(state.overflow <= 0, `${path} at ${width}px: ${state.overflow}px of horizontal scroll`);
+          assert(state.sections.length > 1, `${path}: no sections`);
+          assert(
+            state.toc.join() === state.sections.map((id) => `#${id}`).join(),
+            `${path}: contents ${state.toc.join()} do not match sections ${state.sections.join()}`,
+          );
+          assert(
+            state.tocVisible === width >= 1024,
+            `${path} at ${width}px: side contents visible = ${state.tocVisible}`,
+          );
+          // Hydration must keep what the server rendered (title, canonical).
+          assert(
+            state.title.startsWith(title) && state.canonical.endsWith(path),
+            `${path}: head changed after load`,
+          );
+          if (width === 1280) {
+            // Scrolled to the last section, the contents mark it as the one being read.
+            const last = state.sections.at(-1);
+            await page.evaluate((id) => {
+              const top = document.getElementById(id).getBoundingClientRect().top + window.scrollY - 100;
+              window.scrollTo({ top, behavior: 'instant' });
+            }, last);
+            await page.waitForFunction(
+              (id) =>
+                document
+                  .querySelector('nav[aria-labelledby="article-toc"] [aria-current="location"]')
+                  ?.getAttribute('href') === `#${id}`,
+              { timeout: 3000 },
+              last,
+            );
+            // The language button opens the same article in the other language.
+            const other = lang === 'en' ? 'vi' : 'en';
+            await Promise.all([
+              page.waitForNavigation({ waitUntil: 'load' }),
+              page.click(`header button[aria-label]:not([data-testid])`),
+            ]);
+            assert(new URL(page.url()).pathname === `/${other}/writing/${slug}`, `switched to ${page.url()}`);
+            await page.screenshot({ path: fromRoot(`.qa/article-${slug}-${other}-1280.png`) });
+          } else {
+            await page.screenshot({ path: fromRoot(`.qa/article-${slug}-${lang}-${width}.png`) });
+          }
+          assert(problems.length === 0, problems.join('\n'));
+        } finally {
+          await close();
+        }
+      }
+    }
+  });
+}
 
 for (const [lang, width] of [
   ['en', 360],
@@ -1310,12 +1434,18 @@ for (const [lang, width] of [
         page.evaluate(() => document.querySelector('[data-status-section]').textContent.slice(0, 5));
       // revealAll ends with a jump from the footer (taller than a phone screen) back to the top.
       await revealAll(page);
-      assert((await section()) === '00/05', `back at the top the bar still shows ${await section()}`);
+      assert(
+        (await section()) === `00/${SECTION_TOTAL}`,
+        `back at the top the bar still shows ${await section()}`,
+      );
       await page.evaluate(() =>
         window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }),
       );
       await sleep(300);
-      assert((await section()) === '05/05', `at the end of the page the bar shows ${await section()}`);
+      assert(
+        (await section()) === `${SECTION_TOTAL}/${SECTION_TOTAL}`,
+        `at the end of the page the bar shows ${await section()}`,
+      );
       const state = await page.evaluate(() => {
         const bar = document.querySelector('[data-status-bar]');
         const barBox = bar.getBoundingClientRect();
@@ -1672,7 +1802,8 @@ await check(
     try {
       const top = await read(page);
       assert(top.hidden && top.tabbable === 0, 'the rail must be decorative: aria-hidden and not focusable');
-      assert(top.items === '#top,#about,#skills,#experience,#projects,#contact', `rail lists ${top.items}`);
+      const rail = `#top,#about,#skills,#experience,#projects${HAS_WRITING ? ',#writing' : ''},#contact`;
+      assert(top.items === rail, `rail lists ${top.items}`);
       assert(
         top.display === 'block' && top.opacity === '0',
         `over the hero the rail is ${top.display}/${top.opacity}`,

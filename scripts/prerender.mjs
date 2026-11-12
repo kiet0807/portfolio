@@ -3,6 +3,7 @@
  *
  *   dist/en/index.html   English page
  *   dist/vi/index.html   Vietnamese page
+ *   dist/<lang>/writing/<slug>/index.html   one page per article and language
  *   dist/404.html        404 page (English markup + Vietnamese <template>, swapped before paint)
  *   dist/index.html      tiny redirect page for `/`
  *   dist/sitemap.xml, dist/robots.txt
@@ -17,8 +18,18 @@ import { fromRoot, kb } from './lib.mjs';
 
 const template = await readFile(fromRoot('dist/index.html'), 'utf8');
 const server = await import(pathToFileURL(fromRoot('dist-ssr/entry-server.js')).href);
-const { render, profile, siteUrl, LANGS, themeInlineScript, redirectInlineScript, notFoundLangInlineScript } =
-  server;
+const {
+  render,
+  profile,
+  siteUrl,
+  LANGS,
+  ARTICLES,
+  articlePath,
+  loadArticle,
+  themeInlineScript,
+  redirectInlineScript,
+  notFoundLangInlineScript,
+} = server;
 
 for (const marker of [
   '<!--csp-->',
@@ -73,6 +84,18 @@ async function emit(relativePath, content) {
 for (const lang of LANGS) {
   const { html, head } = render({ kind: 'page', lang });
   await emit(`${lang}/index.html`, fill({ lang, head, html, inlineScripts: [themeInlineScript] }));
+}
+
+/* ------------------------- /<lang>/writing/<slug> ------------------------- */
+for (const { slug } of ARTICLES) {
+  for (const lang of LANGS) {
+    const article = await loadArticle(slug, lang);
+    const { html, head } = render({ kind: 'article', lang, slug }, article);
+    await emit(
+      `${articlePath(lang, slug).slice(1)}/index.html`,
+      fill({ lang, head, html, inlineScripts: [themeInlineScript] }),
+    );
+  }
 }
 
 /* --------------------------------- /404 ---------------------------------- */
@@ -133,13 +156,26 @@ ${LANGS.map((lang) => `    <link rel="alternate" hreflang="${lang}" href="${site
 
 /* --------------------------- sitemap and robots --------------------------- */
 {
-  const alternates = [
-    ...LANGS.map((lang) => `    <xhtml:link rel="alternate" hreflang="${lang}" href="${siteUrl}/${lang}" />`),
-    `    <xhtml:link rel="alternate" hreflang="x-default" href="${siteUrl}/en" />`,
-  ].join('\n');
-  const urls = LANGS.map(
-    (lang) => `  <url>\n    <loc>${siteUrl}/${lang}</loc>\n${alternates}\n  </url>`,
-  ).join('\n');
+  // Every page exists in each language; each <url> lists all of them as alternates.
+  const pages = [
+    { path: (lang) => `/${lang}` },
+    ...ARTICLES.map((article) => ({
+      path: (lang) => articlePath(lang, article.slug),
+      lastmod: article.date,
+    })),
+  ];
+  const urls = pages
+    .flatMap(({ path, lastmod }) => {
+      const alternates = [
+        ...LANGS.map((l) => `    <xhtml:link rel="alternate" hreflang="${l}" href="${siteUrl}${path(l)}" />`),
+        `    <xhtml:link rel="alternate" hreflang="x-default" href="${siteUrl}${path('en')}" />`,
+      ].join('\n');
+      return LANGS.map(
+        (lang) =>
+          `  <url>\n    <loc>${siteUrl}${path(lang)}</loc>\n${lastmod ? `    <lastmod>${lastmod}</lastmod>\n` : ''}${alternates}\n  </url>`,
+      );
+    })
+    .join('\n');
   await emit(
     'sitemap.xml',
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls}\n</urlset>\n`,
@@ -150,7 +186,7 @@ ${LANGS.map((lang) => `    <link rel="alternate" hreflang="${lang}" href="${site
 await rm(fromRoot('dist-ssr'), { recursive: true, force: true });
 
 console.log(`Prerendered (site URL: ${siteUrl}):`);
-for (const [file, bytes] of written) console.log(`  dist/${file.padEnd(16)} ${kb(bytes)}`);
+for (const [file, bytes] of written) console.log(`  dist/${file.padEnd(40)} ${kb(bytes)}`);
 if (siteUrl.includes('example.com')) {
   console.log('  note: canonical/OG URLs use the placeholder domain. Set SITE_URL or deploy on Vercel.');
 }

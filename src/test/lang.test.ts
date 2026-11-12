@@ -3,6 +3,7 @@ import { detectLangExpression } from '@/i18n/inline-scripts';
 import { resolveInitialLang } from '@/i18n/lang';
 import { STORAGE_KEYS } from '@/lib/storage';
 import { resolveRoute } from '@/routing';
+import { ARTICLES } from '@/content/articles';
 
 describe('resolveInitialLang', () => {
   it('prefers the language in the URL', () => {
@@ -36,6 +37,18 @@ describe('resolveRoute', () => {
       kind: 'notFound',
       lang: 'vi',
     });
+  });
+  it('maps /<lang>/writing/<slug> to an article, and an unknown slug to not found', () => {
+    const [article] = ARTICLES;
+    if (!article) return;
+    expect(resolveRoute({ ...base, pathname: `/vi/writing/${article.slug}` })).toEqual({
+      kind: 'article',
+      lang: 'vi',
+      slug: article.slug,
+    });
+    expect(resolveRoute({ ...base, pathname: '/en/writing/no-such-article' }).kind).toBe('notFound');
+    expect(resolveRoute({ ...base, pathname: '/en/writing' }).kind).toBe('notFound');
+    expect(resolveRoute({ ...base, pathname: `/fr/writing/${article.slug}` }).kind).toBe('notFound');
   });
 });
 

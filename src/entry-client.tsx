@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
 import { App } from './App';
+import { loadArticle, type Article } from './content/articles';
 import { pathForLang, readStoredLang, resolveInitialLang } from './i18n/lang';
 import { resolveRoute } from './routing';
 import './styles.css';
@@ -9,7 +10,7 @@ function browserLanguages(): readonly string[] {
   return navigator.languages.length > 0 ? navigator.languages : [navigator.language];
 }
 
-function start(): void {
+async function start(): Promise<void> {
   const container = document.getElementById('root');
   if (!container) return;
 
@@ -25,9 +26,22 @@ function start(): void {
   }
 
   const route = resolveRoute({ pathname, stored, browserLanguages: browserLanguages() });
+
+  // An article page hydrates with the same text it was prerendered from, so fetch it first.
+  // If that fails (offline, a deploy replaced the chunk), the prerendered page stays as it is:
+  // fully readable, only the theme and language buttons do nothing.
+  let article: Article | undefined;
+  if (route.kind === 'article') {
+    try {
+      article = await loadArticle(route.slug, route.lang);
+    } catch {
+      return;
+    }
+  }
+
   const app = (
     <StrictMode>
-      <App route={route} />
+      <App route={route} article={article} />
     </StrictMode>
   );
 
@@ -36,4 +50,4 @@ function start(): void {
   else createRoot(container).render(app);
 }
 
-start();
+void start();

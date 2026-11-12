@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import axe from 'axe-core';
 import { describe, expect, it } from 'vitest';
 import { App } from '@/App';
+import { ARTICLES, loadArticle } from '@/content/articles';
 import { t } from '@/i18n/dictionary';
 import type { Route } from '@/seo/head';
 
@@ -23,6 +24,15 @@ describe('accessibility (axe-core)', () => {
     });
     const summary = results.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length} nodes)`);
     expect(summary).toEqual([]);
+  });
+
+  it.each(
+    ARTICLES.flatMap((article) => (['en', 'vi'] as const).map((lang) => ({ slug: article.slug, lang }))),
+  )('has no violations: article $slug /$lang', async ({ slug, lang }) => {
+    const article = await loadArticle(slug, lang);
+    const { container } = render(<App route={{ kind: 'article', lang, slug }} article={article} />);
+    const results = await axe.run(container, { rules: { 'color-contrast': { enabled: false } } });
+    expect(results.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length} nodes)`)).toEqual([]);
   });
 
   it('has no violations with the command menu open', async () => {

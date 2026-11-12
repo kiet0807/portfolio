@@ -17,7 +17,8 @@ import { startServer } from './serve.mjs';
 
 const LIGHTHOUSE_VERSION = '13.6.0';
 const RUNS = Number(process.env.LH_RUNS ?? 3);
-const PAGES = ['/en', '/vi'];
+// The two home pages, and one article page (the reading layout).
+const PAGES = ['/en', '/vi', '/vi/writing/typescript-migration'];
 const THRESHOLDS = { performance: 90, accessibility: 95, 'best-practices': 95, seo: 95 };
 const CATEGORIES = Object.keys(THRESHOLDS);
 
@@ -55,7 +56,7 @@ try {
     const failing = new Map();
 
     for (let i = 1; i <= RUNS; i += 1) {
-      const report = fromRoot(`.lighthouse/${page.slice(1)}-${i}.json`);
+      const report = fromRoot(`.lighthouse/${page.slice(1).replaceAll('/', '_')}-${i}.json`);
       await run('pnpm', [
         'dlx',
         `lighthouse@${LIGHTHOUSE_VERSION}`,

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { SECTIONS } from '@/components/layout/sections';
+import { ARTICLES } from '@/content/articles';
 import { allSkills, profile, topStack } from '@/data/profile';
 import { dictionary } from '@/i18n/dictionary';
 import { LANGS } from '@/i18n/types';
@@ -100,7 +101,7 @@ describe('profile data', () => {
 
   it('lists the Writing section in the navigation only when there is something to read', () => {
     const ids = SECTIONS.map((section) => section.id);
-    expect(ids.includes('writing')).toBe(profile.writing.length > 0);
+    expect(ids.includes('writing')).toBe(ARTICLES.length > 0 || profile.writing.length > 0);
     expect(ids.at(-1)).toBe('contact');
   });
 });

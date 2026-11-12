@@ -9,6 +9,7 @@ import {
   type MouseEvent,
 } from 'react';
 import { SECTIONS, TOP_ID } from './sections';
+import { ARTICLES, articlePath } from '@/content/articles';
 import { profile } from '@/data/profile';
 import type { DictKey } from '@/i18n/dictionary';
 import type { Lang } from '@/i18n/types';
@@ -122,6 +123,14 @@ export default function CommandPalette({ onClose, onSwitchLang }: CommandPalette
         hint: pad(i + 1),
         keywords: section.id,
         run: () => goTo(section.id),
+      })),
+      ...ARTICLES.map((article): Command => ({
+        id: `article-${article.slug}`,
+        group: 'navigate',
+        label: article.title[lang],
+        hint: t('writing.article'),
+        keywords: `${article.tags.join(' ')} article blog bài viết`,
+        run: () => window.location.assign(articlePath(lang, article.slug)),
       })),
       ...THEMES.map((item): Command => ({
         id: `theme-${item}`,

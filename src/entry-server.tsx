@@ -1,8 +1,10 @@
 import { StrictMode } from 'react';
 import { renderToString } from 'react-dom/server';
 import { App } from './App';
+import type { Article } from './content/articles';
 import { pageTitle, renderHead, type Route } from './seo/head';
 
+export { ARTICLES, articlePath, loadArticle } from './content/articles';
 export { profile } from './data/profile';
 export { notFoundLangInlineScript, redirectInlineScript } from './i18n/inline-scripts';
 export { LANGS } from './i18n/types';
@@ -17,11 +19,11 @@ export interface RenderResult {
   title: string;
 }
 
-/** Called by scripts/prerender.mjs for every static route. */
-export function render(route: Route): RenderResult {
+/** Called by scripts/prerender.mjs for every static route. An article route needs its loaded article. */
+export function render(route: Route, article?: Article): RenderResult {
   const html = renderToString(
     <StrictMode>
-      <App route={route} />
+      <App route={route} article={article} />
     </StrictMode>,
   );
   return { html, head: renderHead(route), title: pageTitle(route) };

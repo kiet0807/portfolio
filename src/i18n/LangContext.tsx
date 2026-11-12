@@ -1,48 +1,57 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { t as translate } from './dictionary';
-import { langFromPathname, pathForLang, persistLang } from './lang';
+import { langFromPathname, persistLang } from './lang';
 import type { Lang } from './types';
 import { LangContext, type LangContextValue } from './useLang';
-import { applyDocumentHead } from '@/seo/head';
+import { applyDocumentHead, pathFor, type Route } from '@/seo/head';
 
 interface LangProviderProps {
-  initialLang: Lang;
-  /** The 404 page has no per-language URL, so switching there does not touch history. */
-  notFound?: boolean;
+  /** The page being shown, in the language it was opened in. */
+  route: Route;
   children: ReactNode;
 }
 
-export function LangProvider({ initialLang, notFound = false, children }: LangProviderProps) {
-  const [lang, setLangState] = useState<Lang>(initialLang);
+/**
+ * The home page switches language in place (and pushes /en or /vi onto the history).
+ * An article loads its text for one language only, so switching there opens the other
+ * language's page. The 404 page has no per-language URL: it switches in place and leaves
+ * the history alone.
+ */
+export function LangProvider({ route, children }: LangProviderProps) {
+  const [lang, setLangState] = useState<Lang>(route.lang);
 
   const setLang = useCallback(
     (next: Lang) => {
       if (next === lang) return;
       persistLang(next);
-      if (!notFound) {
+      if (route.kind === 'article') {
+        window.location.assign(pathFor(route, next));
+        return;
+      }
+      if (route.kind === 'page') {
         const { search, hash } = window.location;
-        window.history.pushState({ lang: next }, '', pathForLang(next) + search + hash);
+        window.history.pushState({ lang: next }, '', pathFor(route, next) + search + hash);
       }
       setLangState(next);
     },
-    [lang, notFound],
+    [lang, route],
   );
 
   // Keep <html lang>, <title>, description and canonical in sync after an in-place switch.
   useEffect(() => {
-    applyDocumentHead({ kind: notFound ? 'notFound' : 'page', lang });
-  }, [lang, notFound]);
+    applyDocumentHead({ ...route, lang });
+  }, [lang, route]);
 
   // Browser back/forward between /en and /vi.
   useEffect(() => {
-    if (notFound) return;
+    if (route.kind !== 'page') return;
     const onPop = () => {
       const fromPath = langFromPathname(window.location.pathname);
       if (fromPath) setLangState(fromPath);
     };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
-  }, [notFound]);
+  }, [route.kind]);
 
   const value = useMemo<LangContextValue>(
     () => ({ lang, setLang, t: (key) => translate(lang, key) }),

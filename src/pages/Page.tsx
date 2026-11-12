@@ -4,7 +4,7 @@ import { Hero } from '@/components/hero/Hero';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { SectionRail } from '@/components/layout/SectionRail';
-import { SECTION_IDS, TOP_ID } from '@/components/layout/sections';
+import { HAS_WRITING, SECTION_IDS, TOP_ID } from '@/components/layout/sections';
 import { SkipLink } from '@/components/layout/SkipLink';
 import { StatusBar } from '@/components/layout/StatusBar';
 import { About } from '@/components/sections/About';
@@ -42,7 +42,7 @@ export function Page() {
         <Skills />
         <Experience />
         <Projects />
-        {profile.writing.length > 0 ? <Writing /> : null}
+        {HAS_WRITING ? <Writing /> : null}
         {profile.testimonials.length > 0 ? <Testimonials /> : null}
         <Contact />
       </main>

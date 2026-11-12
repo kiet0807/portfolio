@@ -22,11 +22,19 @@ interface HeaderProps {
   onSwitchLang: (next: Lang) => void;
   /** Opens the command menu. Without it the button is not rendered (404 page). */
   onOpenMenu?: () => void;
-  /** Hide section links (used by the 404 page). */
+  /** Hide section links (used by the 404 and article pages). */
   minimal?: boolean;
+  /** Show the reading progress bar even when `minimal` (article pages). */
+  progress?: boolean;
 }
 
-export function Header({ activeId, onSwitchLang, onOpenMenu, minimal = false }: HeaderProps) {
+export function Header({
+  activeId,
+  onSwitchLang,
+  onOpenMenu,
+  minimal = false,
+  progress = !minimal,
+}: HeaderProps) {
   const { lang, t } = useLang();
   const shortcut = useShortcutLabel();
   const { theme, next, toggle } = useTheme();
@@ -88,7 +96,7 @@ export function Header({ activeId, onSwitchLang, onOpenMenu, minimal = false }: 
       )}
     >
       {/* Reading progress, driven purely by CSS scroll-linked animation where supported. */}
-      {!minimal ? <div aria-hidden="true" className="scroll-progress" /> : null}
+      {progress ? <div aria-hidden="true" className="scroll-progress" /> : null}
 
       <nav
         aria-label={t('nav.primary')}
