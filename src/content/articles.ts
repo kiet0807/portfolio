@@ -40,7 +40,7 @@ export const ARTICLES: readonly ArticleMeta[] = [
       vi: 'Cách frontend của một hệ thống quản lý đơn hàng đang chạy production chuyển từ JavaScript sang TypeScript strict trong mười ngày: mười tháng dựng cấu trúc trước, chia lô nhỏ, AI agent có kiểm soát, và những lỗi thật mà việc đặt type tìm ra.',
     },
     tags: ['TypeScript', 'React', 'Refactoring', 'AI agents'],
-    minutes: { en: 4, vi: 5 },
+    minutes: { en: 5, vi: 6 },
   },
 ];
 

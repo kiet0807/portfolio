@@ -1107,6 +1107,60 @@ dialog.palette::backdrop {
   background: none;
   font-size: inherit;
 }
+/* The language of a code block, as a small caption in the corner (decoration only). */
+.prose-article pre[data-lang] {
+  position: relative;
+  padding-top: 2rem;
+}
+.prose-article pre[data-lang]::before {
+  content: attr(data-lang);
+  content: attr(data-lang) / '';
+  position: absolute;
+  top: 0.6rem;
+  right: 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.prose-article .table-wrap {
+  margin-top: 1.5em;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: var(--surface);
+}
+.prose-article table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+  line-height: 1.55;
+}
+.prose-article th {
+  padding: 0.7rem 1rem;
+  background: var(--surface-2);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+/* Code keeps its exact spelling inside the upper-case header. */
+.prose-article th code {
+  text-transform: none;
+  letter-spacing: 0;
+}
+.prose-article td {
+  padding: 0.7rem 1rem;
+  border-top: 1px solid var(--line);
+  vertical-align: top;
+}
+.prose-article td:first-child {
+  font-weight: 600;
+}
 @media (min-width: 640px) {
   .prose-article {
     font-size: 1.125rem;

@@ -87,6 +87,24 @@ describe('parseMarkdown', () => {
     expect(blocks[6]).toMatchObject({ level: 3, id: 'dot-cuoi' });
   });
 
+  it('reads a table, keeping pipes inside code and padding short rows', () => {
+    const [table] = parseMarkdown(
+      ['| Agent | Reads |', '| --- | :---: |', '| **Codex** | `a|b` |', '| Gemini |'].join('\n'),
+    );
+    expect(table).toEqual({
+      kind: 'table',
+      head: [[{ kind: 'text', text: 'Agent' }], [{ kind: 'text', text: 'Reads' }]],
+      rows: [
+        [[{ kind: 'strong', children: [{ kind: 'text', text: 'Codex' }] }], [{ kind: 'code', text: 'a|b' }]],
+        [[{ kind: 'text', text: 'Gemini' }], []],
+      ],
+    });
+  });
+
+  it('treats a lone pipe line without a rule row as a paragraph', () => {
+    expect(parseMarkdown('| not a table |')[0]?.kind).toBe('paragraph');
+  });
+
   it('gives repeated headings distinct anchors', () => {
     const ids = parseMarkdown('## Notes\n\n## Notes\n\n## Notes').map((block) =>
       block.kind === 'heading' ? block.id : '',

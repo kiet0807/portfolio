@@ -2,7 +2,7 @@
  * A small Markdown reader for the articles in src/content/writing.
  *
  * It understands what the articles use and nothing more: `##` and `###` headings,
- * paragraphs, `-` and `1.` lists, `>` quotes, fenced code blocks, and inline **bold**,
+ * paragraphs, `-` and `1.` lists, `>` quotes, fenced code blocks, `| a | b |` tables, and inline **bold**,
  * *italic*, `code` and [links](https://…). Everything else stays plain text: the output is
  * data for React to render, never HTML, so an article cannot inject markup.
  *
@@ -29,17 +29,54 @@ export type Block =
   | { readonly kind: 'paragraph'; readonly content: readonly Inline[] }
   | { readonly kind: 'list'; readonly ordered: boolean; readonly items: readonly (readonly Inline[])[] }
   | { readonly kind: 'quote'; readonly content: readonly Inline[] }
-  | { readonly kind: 'code'; readonly lang: string; readonly text: string };
+  | { readonly kind: 'code'; readonly lang: string; readonly text: string }
+  | {
+      readonly kind: 'table';
+      readonly head: readonly (readonly Inline[])[];
+      readonly rows: readonly (readonly (readonly Inline[])[])[];
+    };
 
 const FENCE = /^```(\w*)\s*$/;
 const HEADING = /^(#{2,3})\s+(.+)$/;
 const BULLET = /^[-*]\s+/;
 const NUMBERED = /^\d+\.\s+/;
+const TABLE_ROW = /^\|.*\|\s*$/;
+const TABLE_RULE = /^\|(\s*:?-{3,}:?\s*\|)+\s*$/;
 
 function startsBlock(line: string): boolean {
   return (
-    FENCE.test(line) || HEADING.test(line) || BULLET.test(line) || NUMBERED.test(line) || line.startsWith('>')
+    FENCE.test(line) ||
+    HEADING.test(line) ||
+    BULLET.test(line) ||
+    NUMBERED.test(line) ||
+    line.startsWith('>') ||
+    TABLE_ROW.test(line)
   );
+}
+
+/** "| a | `b|c` |" → ["a", "`b|c`"]: splits on the pipes outside code spans. */
+function tableCells(line: string): string[] {
+  const inner = line.trim().replace(/^\|/, '').replace(/\|$/, '');
+  const cells: string[] = [];
+  let cell = '';
+  let inCode = false;
+  for (let i = 0; i < inner.length; i++) {
+    const ch = inner[i] ?? '';
+    if (ch === '\\' && inner[i + 1] === '|') {
+      cell += '|';
+      i++;
+    } else if (ch === '`') {
+      inCode = !inCode;
+      cell += ch;
+    } else if (ch === '|' && !inCode) {
+      cells.push(cell.trim());
+      cell = '';
+    } else {
+      cell += ch;
+    }
+  }
+  cells.push(cell.trim());
+  return cells;
 }
 
 /** Index of the closing marker, skipping escaped characters and code spans; -1 when there is none. */
@@ -204,6 +241,19 @@ export function parseMarkdown(source: string): Block[] {
       continue;
     }
 
+    // A table: a header row, a rule row of dashes, then body rows. Short rows are padded.
+    if (TABLE_ROW.test(line) && TABLE_RULE.test(lines[i + 1] ?? '')) {
+      const head = tableCells(line);
+      i += 2;
+      const rows: Inline[][][] = [];
+      while (i < lines.length && TABLE_ROW.test(lines[i] ?? '')) {
+        const cells = tableCells(lines[i++] ?? '');
+        rows.push(head.map((_, c) => parseInline(cells[c] ?? '')));
+      }
+      blocks.push({ kind: 'table', head: head.map((cell) => parseInline(cell)), rows });
+      continue;
+    }
+
     if (line.startsWith('>')) {
       const parts: string[] = [];
       while (i < lines.length && (lines[i] ?? '').startsWith('>'))
@@ -228,10 +278,8 @@ export function parseMarkdown(source: string): Block[] {
 
 /** Words in the text, for reading time. Vietnamese counts syllables, which reads at about the same pace. */
 export function wordCount(source: string): number {
-  return source
-    .replace(/[`*#>[\]()]/g, ' ')
-    .split(/\s+/)
-    .filter(Boolean).length;
+  // Only tokens with a letter or digit count: table pipes, rules and list markers do not.
+  return source.split(/\s+/).filter((token) => /[\p{L}\p{N}]/u.test(token)).length;
 }
 
 /** Minutes to read at 230 words a minute, never less than one. */

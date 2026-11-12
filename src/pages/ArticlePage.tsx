@@ -174,7 +174,7 @@ export function ArticlePage({ article }: { article: Article }) {
                   </details>
                 ) : null}
 
-                <Prose blocks={blocks} externalLabel={t('a11y.external')} />
+                <Prose blocks={blocks} labels={{ external: t('a11y.external'), table: t('article.table') }} />
 
                 <aside
                   aria-labelledby="article-author"
