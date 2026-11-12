@@ -75,13 +75,14 @@ export function Assistant() {
         {/*
           Kai's hello, shown once after the first-visit flight. It is part of the button, so
           pressing it opens the chat. Decorative for assistive technology: the button has a
-          name, and the panel greets again.
+          name, and the panel greets again. It stands on the button's bottom edge and grows
+          upwards, so however many lines the greeting takes it stays clear of the status bar.
         */}
         <span
           aria-hidden="true"
           data-bot-greeting={greeting ? 'shown' : 'hidden'}
           className={cn(
-            'absolute top-1/2 right-full mr-3 w-max max-w-[min(17rem,calc(100vw-6.5rem))] -translate-y-1/2 rounded-2xl rounded-br-md border border-ai/40 bg-surface/95 px-4 py-2.5 text-left text-sm font-medium text-pretty text-fg shadow-glow-ai backdrop-blur-md transition-[opacity,transform] duration-500 ease-water',
+            'absolute right-full bottom-0 mr-3 w-max max-w-[min(17rem,calc(100vw-6.5rem))] rounded-2xl rounded-br-md border border-ai/40 bg-surface/95 px-4 py-2.5 text-left text-sm font-medium text-pretty text-fg shadow-glow-ai backdrop-blur-md transition-[opacity,transform] duration-500 ease-water',
             greeting && !open ? 'translate-x-0 opacity-100' : 'pointer-events-none translate-x-2 opacity-0',
           )}
         >

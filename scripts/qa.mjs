@@ -1987,12 +1987,14 @@ await check(
             opacity: getComputedStyle(bubble).opacity,
             inside:
               r.left >= 0 && r.right <= window.innerWidth && r.top >= 0 && r.bottom <= window.innerHeight,
+            // The status bar is pinned to the bottom of the window, in front of the page.
+            clearOfBar: r.bottom <= document.querySelector('[data-status-bar]').getBoundingClientRect().top,
           };
         });
       await sleep(700);
       const greeting = await hello();
       assert(
-        greeting.state === 'shown' && greeting.opacity === '1' && greeting.inside,
+        greeting.state === 'shown' && greeting.opacity === '1' && greeting.inside && greeting.clearOfBar,
         `after landing the greeting is ${JSON.stringify(greeting)}`,
       );
       assert(greeting.text.startsWith("Hi, I'm Kai"), `Kai greets with "${greeting.text}"`);
