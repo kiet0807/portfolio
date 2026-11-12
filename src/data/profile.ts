@@ -246,6 +246,9 @@ export interface Profile {
 /*  - The share of AI-written code (about 80%): the owner's own        */
 /*    estimate. The agent guides (AGENTS.md, CLAUDE.md) are in three   */
 /*    of the Onflow repositories, added by the owner in 2026.          */
+/*  - Fulfillment Connect, seven weeks to production: first commit   */
+/*    12 May 2026, production deployment 30 June 2026 (git dates,     */
+/*    confirmed by the owner).                                        */
 /*  - Skill years, the availability rows and "exploring" are           */
 /*    estimates: adjust them to taste.                                 */
 /* ------------------------------------------------------------------ */
@@ -263,15 +266,12 @@ export const profile: Profile = {
   },
   availability: {
     open: true,
-    label: { en: 'Open to work', vi: 'Sẵn sàng nhận việc' },
+    label: { en: 'Open to collaboration', vi: 'Sẵn sàng hợp tác' },
     details: [
       {
         id: 'roles',
         label: { en: 'Good fit', vi: 'Phù hợp' },
-        value: {
-          en: 'Full-time roles and freelance projects, frontend or full-stack',
-          vi: 'Vị trí full-time và dự án freelance, frontend hoặc full-stack',
-        },
+        value: { en: 'Frontend and full-stack product work', vi: 'Dự án frontend và full-stack' },
       },
       {
         id: 'mode',
@@ -403,7 +403,10 @@ export const profile: Profile = {
     guardrails: [
       { en: 'Strict TypeScript, no JavaScript left', vi: 'TypeScript strict, không còn JavaScript' },
       { en: 'Architecture rules checked by lint in CI', vi: 'Quy tắc kiến trúc do lint kiểm tra trong CI' },
-      { en: '800+ test files run on every pull request', vi: 'Hơn 800 file test chạy trên mỗi pull request' },
+      {
+        en: 'Tests run on every pull request: 800+ files across three codebases',
+        vi: 'Test chạy trên mỗi pull request: hơn 800 file ở ba codebase',
+      },
       {
         en: 'Agent guides and skills in the repository',
         vi: 'Hướng dẫn và skill cho agent nằm trong repository',
@@ -413,8 +416,8 @@ export const profile: Profile = {
   },
   email: 'kiet080797@gmail.com',
   contactNote: {
-    en: "Hiring a frontend developer, or have a product to build? I'd love to hear about it.",
-    vi: 'Bạn đang tuyển frontend developer, hoặc có sản phẩm cần xây dựng? Tôi rất sẵn lòng trao đổi.',
+    en: "Have a product to build or a codebase to untangle? I'd love to hear about it.",
+    vi: 'Bạn có sản phẩm cần xây dựng hoặc một codebase cần gỡ rối? Tôi rất sẵn lòng trao đổi.',
   },
   socials: [
     {
@@ -547,12 +550,12 @@ export const profile: Profile = {
         { name: 'AGENTS.md / CLAUDE.md', years: 1 },
         { name: 'Model routing', years: 1 },
         { name: 'Token optimization', years: 1 },
+        { name: 'MCP', years: 1 },
       ],
     },
   ],
   exploring: [
     'Claude Certified Architect',
-    'MCP',
     'Prompt caching',
     'React 19',
     'Tailwind CSS 4',
@@ -580,8 +583,8 @@ export const profile: Profile = {
           vi: 'Chuyển build của OMS từ Create React App sang Vite và nâng cấp các dependency cốt lõi để build và deploy nhanh hơn; xây dựng phần lớn bộ test và các quy tắc lint kiến trúc.',
         },
         {
-          en: 'Built the Fulfillment Connect console (nine feature modules) from an empty repository, then created Onflow Shared Packages: the UI, API runtime and tooling shared by both applications.',
-          vi: 'Xây dựng giao diện Fulfillment Connect (chín module tính năng) từ một repository trống, sau đó tạo Onflow Shared Packages: bộ UI, API runtime và tooling dùng chung cho cả hai ứng dụng.',
+          en: 'Built the Fulfillment Connect console from an empty repository to production in seven weeks (nine feature modules today), then created Onflow Shared Packages: the UI, API runtime and tooling both apps share.',
+          vi: 'Xây dựng giao diện Fulfillment Connect từ repository trống tới production trong bảy tuần (hiện có chín module), sau đó tạo Onflow Shared Packages: bộ UI, API runtime và tooling dùng chung cho hai ứng dụng.',
         },
         {
           en: 'Delivered inbound, outbound, courier and reporting screens for the Operations System (OPS) and built two internal Google Apps Script tools: a warehouse inbound booking form and a Taiga-to-Sheets sync.',
@@ -776,7 +779,7 @@ export const profile: Profile = {
       },
       metrics: [
         { value: '9', label: { en: 'feature modules', vi: 'module tính năng' } },
-        { value: '910', label: { en: 'TypeScript files', vi: 'file TypeScript' } },
+        { value: '7', label: { en: 'weeks to production', vi: 'tuần tới production' } },
         { value: '197', label: { en: 'test files', vi: 'file test' } },
       ],
       tech: ['React', 'TypeScript', 'Zustand', 'TanStack Query', 'Unleash'],
