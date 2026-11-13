@@ -767,20 +767,20 @@ export const profile: Profile = {
       type: { en: 'Open source', vi: 'Mã nguồn mở' },
       role: { en: 'Author', vi: 'Tác giả' },
       description: {
-        en: 'A Model Context Protocol server that lets Claude and other AI assistants read Taiga: sprints, stories, tasks, issues, epics, the wiki, activity and attached files, through read-only tools. It runs locally or hosted, where each person signs in with their own Taiga account over OAuth 2.1 and nothing is stored. Large files come back as an overview first, then part by part, to spare the model’s context.',
-        vi: 'Server Model Context Protocol giúp Claude và các trợ lý AI khác đọc Taiga: sprint, story, task, issue, epic, wiki, hoạt động và file đính kèm, qua các tool chỉ đọc. Chạy trên máy hoặc hosted: mỗi người đăng nhập bằng tài khoản Taiga của mình qua OAuth 2.1, server không lưu gì. File lớn trả về bản tóm lược trước rồi đọc từng phần, để tiết kiệm context của model.',
+        en: 'A Model Context Protocol server that lets Claude and other AI assistants work with Taiga: 14 read tools (sprints, stories, tasks, issues, epics, the wiki, activity, attached files) + 3 write tools (create, update, comment), on only when the user allows it, with no delete. It runs locally or hosted, where each person signs in with their own Taiga account over OAuth 2.1 and nothing is stored. Large files come back as an overview first, then part by part, to spare the model’s context.',
+        vi: 'Server Model Context Protocol giúp Claude và các trợ lý AI khác làm việc với Taiga: 14 tool đọc (sprint, story, task, issue, epic, wiki, hoạt động, file đính kèm) + 3 tool ghi (tạo, sửa, bình luận), bật khi người dùng cho phép, không xóa. Chạy trên máy hoặc hosted: mỗi người đăng nhập bằng tài khoản Taiga của mình qua OAuth 2.1, server không lưu gì. File lớn trả về bản tóm lược trước rồi đọc từng phần, để tiết kiệm context của model.',
       },
       metrics: [
-        { value: '14', label: { en: 'read-only tools', vi: 'tool chỉ đọc' } },
-        { value: '199', label: { en: 'automated tests', vi: 'test tự động' } },
+        { value: '14 + 3', label: { en: 'read + write tools', vi: 'tool đọc + ghi' } },
+        { value: '243', label: { en: 'automated tests', vi: 'test tự động' } },
         { value: '0', label: { en: 'passwords stored', vi: 'mật khẩu được lưu' } },
       ],
       tech: ['TypeScript', 'MCP SDK', 'OAuth 2.1', 'Express', 'Vitest'],
       ai: true,
       // On the CV as one row: the stats band was taken off the CV to make room (2026-11-13).
       cvLine: {
-        en: 'MCP server that lets Claude and other AI assistants read Taiga, locally or hosted with a sign-in per person.',
-        vi: 'Server MCP giúp Claude và trợ lý AI khác đọc Taiga, chạy trên máy hoặc hosted, mỗi người đăng nhập riêng.',
+        en: 'MCP server for Taiga: 14 read + 3 write tools (on only if the user allows, no delete), local or hosted.',
+        vi: 'Server MCP cho Taiga: 14 tool đọc + 3 tool ghi (bật khi người dùng cho phép, không xóa), chạy trên máy hoặc hosted, mỗi người đăng nhập riêng.',
       },
       // The printed website would reach five pages with this card.
       print: false,
