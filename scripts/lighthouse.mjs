@@ -18,7 +18,14 @@ import { startServer } from './serve.mjs';
 const LIGHTHOUSE_VERSION = '13.6.0';
 const RUNS = Number(process.env.LH_RUNS ?? 3);
 // The two home pages, and the two articles (one per language).
-const PAGES = ['/en', '/vi', '/vi/writing/typescript-migration', '/en/writing/ai-agent-setup'];
+const PAGES = [
+  '/en',
+  '/vi',
+  '/vi/writing/typescript-migration',
+  '/en/writing/ai-agent-setup',
+  '/vi/writing/taiga-mcp',
+  '/en/writing/taiga-mcp',
+];
 const THRESHOLDS = { performance: 90, accessibility: 95, 'best-practices': 95, seo: 95 };
 const CATEGORIES = Object.keys(THRESHOLDS);
 

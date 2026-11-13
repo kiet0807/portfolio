@@ -30,6 +30,20 @@ export interface Article {
 
 export const ARTICLES: readonly ArticleMeta[] = [
   {
+    slug: 'taiga-mcp',
+    date: '2026-11-13',
+    title: {
+      en: 'Letting Claude read and write Taiga: an MCP server from scratch',
+      vi: 'Cho Claude đọc và ghi Taiga: dựng một server MCP từ đầu',
+    },
+    summary: {
+      en: 'How I built taiga-mcp, an open-source MCP server for Taiga: tools designed for a model as the reader, attachments read as an overview first, a hosted server that stores nothing, and writing behind three locks, with no delete.',
+      vi: 'Cách tôi xây taiga-mcp, server MCP mã nguồn mở cho Taiga: tool thiết kế cho người đọc là model, file đính kèm đọc theo bản tóm lược trước, bản hosted không lưu gì, và quyền ghi sau ba lớp khóa, không có xóa.',
+    },
+    tags: ['MCP', 'AI agents', 'OAuth', 'TypeScript'],
+    minutes: { en: 10, vi: 11 },
+  },
+  {
     slug: 'ai-agent-setup',
     date: '2026-11-12',
     title: {
