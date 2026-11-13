@@ -261,6 +261,7 @@ export function renderCv({ profile, lang, t, fontUrl, avatarUrl, siteUrl, phone 
     .join('');
 
   const projects = profile.projects
+    .filter((project) => project.paper !== false)
     .map(
       (project) => `
       <article class="card">

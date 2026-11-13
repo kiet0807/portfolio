@@ -57,6 +57,16 @@ export interface Project {
   readonly repoUrl?: string;
   /** Which built-in wireframe to draw (default: 'generic'). Ignored when `image` is set. */
   readonly visual?: ProjectVisualKind;
+  /**
+   * Work about AI: the card takes the violet AI accent and the whole row, so put such a
+   * project first. Violet stays reserved for what is about AI.
+   */
+  readonly ai?: boolean;
+  /**
+   * `false` keeps the project off paper: the CV and the website's printed version, which are
+   * both at their page limit. It stays on the website. Default: on paper too.
+   */
+  readonly paper?: boolean;
   /** A real screenshot in /public (16:9 works best). Replaces the wireframe. */
   readonly image?: {
     readonly src: string;
@@ -746,6 +756,41 @@ export const profile: Profile = {
     },
   ],
   projects: [
+    {
+      // Counts from the repository at commit 027aae3 (2026-11-13): 14 tools registered in
+      // src/server.ts, 199 tests in `pnpm check`. The server keeps no password: it hands it to Taiga once.
+      id: 'taiga-mcp',
+      name: 'Taiga MCP',
+      year: 2026,
+      type: { en: 'Open source', vi: 'Mã nguồn mở' },
+      role: { en: 'Author', vi: 'Tác giả' },
+      description: {
+        en: 'A Model Context Protocol server that lets Claude and other AI assistants read Taiga: sprints, stories, tasks, issues, epics, the wiki, activity and attached files, through read-only tools. It runs locally or hosted, where each person signs in with their own Taiga account over OAuth 2.1 and nothing is stored. Large files come back as an overview first, then part by part, to spare the model’s context.',
+        vi: 'Server Model Context Protocol giúp Claude và các trợ lý AI khác đọc Taiga: sprint, story, task, issue, epic, wiki, hoạt động và file đính kèm, qua các tool chỉ đọc. Chạy trên máy hoặc hosted: mỗi người đăng nhập bằng tài khoản Taiga của mình qua OAuth 2.1, server không lưu gì. File lớn trả về bản tóm lược trước rồi đọc từng phần, để tiết kiệm context của model.',
+      },
+      metrics: [
+        { value: '14', label: { en: 'read-only tools', vi: 'tool chỉ đọc' } },
+        { value: '199', label: { en: 'automated tests', vi: 'test tự động' } },
+        { value: '0', label: { en: 'passwords stored', vi: 'mật khẩu được lưu' } },
+      ],
+      tech: ['TypeScript', 'MCP SDK', 'OAuth 2.1', 'Express', 'Vitest'],
+      ai: true,
+      // Paper is full (measured 2026-11-13): even a one-row entry pushes the English CV onto a
+      // third page, and the card takes the printed site to five. The CV names MCP among the
+      // skills and links to this site.
+      paper: false,
+      demoUrl: 'https://taiga.kietnguyen.io.vn',
+      repoUrl: 'https://github.com/kiet0807/taiga-mcp',
+      image: {
+        src: '/projects/taiga-mcp.webp',
+        width: 1200,
+        height: 630,
+        alt: {
+          en: 'taiga-mcp: Taiga for AI assistants. Ask Claude about your projects, sprints, user stories, tasks and issues, in plain words.',
+          vi: 'taiga-mcp: Taiga cho trợ lý AI. Hỏi Claude về project, sprint, user story, task và issue bằng lời bình thường.',
+        },
+      },
+    },
     {
       id: 'oms',
       name: 'Onflow OMS',

@@ -909,6 +909,8 @@ await check(
           codeBg: getComputedStyle(code).backgroundColor,
           codeText: code.textContent,
           frames: frames.length,
+          // A card with a real screenshot shows it instead of a wireframe.
+          shots: document.querySelectorAll('#projects article img').length,
           framesHidden: frames.every(hidden),
           frameHeights: frames.map((svg) => Math.round(svg.getBoundingClientRect().height)),
           cards: document.querySelectorAll('#projects article').length,
@@ -927,8 +929,8 @@ await check(
       assert(state.codeText.includes(`available: ${AVAILABLE}`), 'code card does not show availability');
       assert(state.codeText.includes('TP. Hồ Chí Minh'), 'code card is not localized');
       assert(
-        state.frames === state.cards && state.cards > 0,
-        `${state.frames} wireframes for ${state.cards} cards`,
+        state.frames + state.shots === state.cards && state.cards > 0,
+        `${state.frames} wireframes and ${state.shots} screenshots for ${state.cards} cards`,
       );
       assert(
         state.frameHeights.every((h) => h > 100),

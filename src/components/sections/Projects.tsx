@@ -1,23 +1,43 @@
 import { ProjectVisual } from './ProjectVisual';
 import { Section } from './Section';
-import { ArrowUpRightIcon, ExternalIcon, GithubIcon, LockIcon } from '@/components/ui/Icons';
+import { ArrowUpRightIcon, ExternalIcon, GithubIcon, LockIcon, SparkIcon } from '@/components/ui/Icons';
 import { Reveal } from '@/components/ui/Reveal';
 import { Tag } from '@/components/ui/Tag';
 import { TiltCard } from '@/components/ui/TiltCard';
 import { profile, type Project } from '@/data/profile';
+import { cn } from '@/lib/cn';
 import { useLang } from '@/i18n/useLang';
 
 const linkClass =
   'text-link inline-flex min-h-9 items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline';
 
+/**
+ * A project card. Work about AI (`project.ai`) takes the violet accent and the whole row:
+ * on large screens its visual sits on the left and the text on the right.
+ */
 function ProjectCard({ project }: { project: Project }) {
   const { lang, t } = useLang();
+  const ai = project.ai === true;
   return (
-    <TiltCard className="group flex flex-col overflow-hidden print:border-0">
-      <ProjectVisual project={project} />
+    <TiltCard
+      accent={ai ? 'ai' : undefined}
+      className={cn(
+        'group flex flex-col overflow-hidden print:border-0',
+        ai && 'lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]',
+      )}
+    >
+      <ProjectVisual
+        project={project}
+        className={
+          ai ? 'lg:flex lg:flex-col lg:justify-end lg:border-r lg:border-b-0 lg:px-8 lg:pt-8' : undefined
+        }
+      />
       <div className="flex flex-1 flex-col p-6 print:p-0">
-        <p className="flex items-center justify-between gap-3 label text-link">
-          {project.type[lang]}
+        <p className={cn('flex items-center justify-between gap-3 label', ai ? 'text-ai' : 'text-link')}>
+          <span className="inline-flex items-center gap-1.5">
+            {ai ? <SparkIcon size={14} className="print:hidden" /> : null}
+            {project.type[lang]}
+          </span>
           <time dateTime={String(project.year)} className="text-muted">
             {project.year}
           </time>
@@ -159,7 +179,15 @@ export function Projects() {
     <Section id="projects" kicker={t('section.projects.kicker')} title={t('section.projects')} tinted>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 print:block">
         {profile.projects.map((project, i) => (
-          <Reveal key={project.id} delay={(i % 3) * 0.08} className="h-full print:mb-5">
+          <Reveal
+            key={project.id}
+            delay={(i % 3) * 0.08}
+            className={cn(
+              'h-full print:mb-5',
+              project.ai && 'md:col-span-2 lg:col-span-3',
+              project.paper === false && 'print:hidden',
+            )}
+          >
             <ProjectCard project={project} />
           </Reveal>
         ))}

@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import type { Project, ProjectVisualKind } from '@/data/profile';
+import { cn } from '@/lib/cn';
 import { useLang } from '@/i18n/useLang';
 
 /* The "screen" is always dark, in both themes, so these colours are fixed. */
@@ -226,15 +227,18 @@ function Wireframe({ kind }: { kind: ProjectVisualKind }) {
  * (`project.image`) or one of the built-in wireframes (`project.visual`).
  * Wireframes are decorative and hidden from assistive technology.
  */
-export function ProjectVisual({ project }: { project: Project }) {
+export function ProjectVisual({ project, className }: { project: Project; className?: string }) {
   const { lang } = useLang();
   const { image } = project;
   return (
     <div
       aria-hidden={image ? undefined : true}
-      className="relative overflow-hidden border-b border-line bg-linear-to-br from-navy via-[#0f2a55] to-[#0c3d5e] px-4 pt-4 print:hidden"
+      className={cn(
+        'relative overflow-hidden border-b border-line bg-linear-to-br from-navy via-[#0f2a55] to-[#0c3d5e] px-4 pt-4 print:hidden',
+        className,
+      )}
     >
-      <div className="pointer-events-none absolute inset-0 tech-grid opacity-70" />
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 tech-grid opacity-70" />
       <div className="relative overflow-hidden rounded-t-lg border border-b-0 border-white/15 shadow-[0_-8px_30px_-12px_rgb(34_211_238/0.35)] transition-transform duration-500 ease-water group-hover:-translate-y-1">
         <div className="flex items-center gap-1.5 border-b border-white/10 bg-[#101f35] px-3 py-2">
           <span className="size-2 rounded-full bg-white/25" />

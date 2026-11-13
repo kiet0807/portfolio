@@ -5,12 +5,14 @@ import { cn } from '@/lib/cn';
 interface TiltCardProps {
   children: ReactNode;
   className?: string;
+  /** 'ai': a violet border and glow instead of the cyan one, for work about AI. */
+  accent?: 'ai';
 }
 
 const spring = { stiffness: 180, damping: 20 };
 
 /** Card with a subtle pointer-following tilt and a cyan glow. Static with reduced motion or touch. */
-export function TiltCard({ children, className }: TiltCardProps) {
+export function TiltCard({ children, className, accent }: TiltCardProps) {
   const reduce = useReducedMotion();
   const px = useMotionValue(0.5);
   const py = useMotionValue(0.5);
@@ -34,7 +36,13 @@ export function TiltCard({ children, className }: TiltCardProps) {
       onPointerLeave={onLeave}
       data-spotlight=""
       style={{ rotateX, rotateY, transformPerspective: 900 }}
-      className={cn('relative h-full card hover:border-accent/50 hover:shadow-glow', className)}
+      className={cn(
+        'relative h-full card',
+        accent === 'ai'
+          ? 'border-ai/40 shadow-glow-ai hover:border-ai/70'
+          : 'hover:border-accent/50 hover:shadow-glow',
+        className,
+      )}
     >
       {children}
     </m.article>
