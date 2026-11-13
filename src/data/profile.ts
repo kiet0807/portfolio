@@ -63,10 +63,12 @@ export interface Project {
    */
   readonly ai?: boolean;
   /**
-   * `false` keeps the project off paper: the CV and the website's printed version, which are
-   * both at their page limit. It stays on the website. Default: on paper too.
+   * One sentence for the CV. With it, the CV shows the project as a single row across the
+   * project cards instead of a card of its own (a fourth card does not fit).
    */
-  readonly paper?: boolean;
+  readonly cvLine?: Localized;
+  /** `false` leaves the project out of the website's printed version, which is at its page limit. */
+  readonly print?: boolean;
   /** A real screenshot in /public (16:9 works best). Replaces the wireframe. */
   readonly image?: {
     readonly src: string;
@@ -775,10 +777,13 @@ export const profile: Profile = {
       ],
       tech: ['TypeScript', 'MCP SDK', 'OAuth 2.1', 'Express', 'Vitest'],
       ai: true,
-      // Paper is full (measured 2026-11-13): even a one-row entry pushes the English CV onto a
-      // third page, and the card takes the printed site to five. The CV names MCP among the
-      // skills and links to this site.
-      paper: false,
+      // On the CV as one row: the stats band was taken off the CV to make room (2026-11-13).
+      cvLine: {
+        en: 'MCP server that lets Claude and other AI assistants read Taiga, locally or hosted with a sign-in per person.',
+        vi: 'Server MCP giúp Claude và trợ lý AI khác đọc Taiga, chạy trên máy hoặc hosted, mỗi người đăng nhập riêng.',
+      },
+      // The printed website would reach five pages with this card.
+      print: false,
       demoUrl: 'https://taiga.kietnguyen.io.vn',
       repoUrl: 'https://github.com/kiet0807/taiga-mcp',
       image: {

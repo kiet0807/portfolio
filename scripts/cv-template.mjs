@@ -128,11 +128,6 @@ h3 { font-size: 1.08rem; font-weight: 700; break-after: avoid; }
 
 .summary p + p { margin-top: 1.6mm; }
 
-.stats { margin-top: 3.4mm; display: grid; grid-template-columns: repeat(4, 1fr); border: 0.25mm solid var(--line); border-radius: 3mm; background: var(--soft); }
-.stats div { padding: 2.1mm 3.4mm; display: flex; flex-direction: column-reverse; justify-content: flex-end; }
-.stats div + div { border-left: 0.25mm solid var(--line); }
-.stats dd { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; color: var(--primary); }
-.stats dt { margin-top: 0.6mm; font-size: 0.82rem; color: var(--muted); }
 
 /* Experience: dates in a rail on the left, like a timeline. */
 /* A role is never split between two sheets. */
@@ -159,6 +154,15 @@ h3 { font-size: 1.08rem; font-weight: 700; break-after: avoid; }
 .metrics dt { font-size: 0.7rem; color: var(--muted); line-height: 1.25; }
 .metrics div { display: flex; flex-direction: column-reverse; justify-content: flex-end; }
 .card .stack { border-top: 0.25mm solid var(--line); padding-top: 1.4mm; margin-top: 2mm; }
+/* A project about AI: one row across the grid, with the violet accent of the AI block. */
+.row { grid-column: 1 / -1; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 4mm; row-gap: 0.4mm; align-items: baseline; border: 0.25mm solid rgb(109 40 217 / 0.35); border-radius: 3mm; padding: 2.2mm 3.4mm; background: linear-gradient(120deg, rgb(109 40 217 / 0.07), rgb(37 99 235 / 0.04)); break-inside: avoid; }
+.row .label { grid-column: 1; grid-row: 1; display: inline-flex; align-items: center; gap: 1mm; color: var(--ai); white-space: nowrap; }
+.row .label .icon { width: 2.6mm; height: 2.6mm; }
+.row h3 { grid-column: 1; grid-row: 2; white-space: nowrap; }
+.row .what { grid-column: 2; grid-row: 1 / span 2; align-self: center; font-size: 0.88rem; }
+.row .repo { font-size: 0.78rem; color: var(--link); white-space: nowrap; }
+.row .metrics { grid-column: 3; grid-row: 1 / span 2; align-self: center; margin: 0; padding: 0; display: flex; gap: 4mm; }
+.row .metrics dd { color: var(--ai); }
 
 /* The AI block wears the violet accent, as on the website. */
 .ai-panel { border: 0.25mm solid rgb(109 40 217 / 0.35); border-radius: 3mm; padding: 3mm 3.6mm; background: linear-gradient(120deg, rgb(109 40 217 / 0.07), rgb(37 99 235 / 0.04)); break-inside: avoid; }
@@ -187,6 +191,9 @@ h3 { font-size: 1.08rem; font-weight: 700; break-after: avoid; }
 .creds .when { padding-top: 0.3mm; }
 .creds b { font-weight: 700; }
 .creds span { display: block; font-size: 0.84rem; color: var(--muted); }
+.explore { margin-top: 2.4mm; padding-top: 2mm; border-top: 0.25mm solid var(--line); break-inside: avoid; }
+.explore p + p { margin-top: 0.6mm; }
+.explore span { white-space: nowrap; }
 `;
 
 /**
@@ -238,13 +245,6 @@ export function renderCv({ profile, lang, t, fontUrl, avatarUrl, siteUrl, phone 
 
   const summary = `<p>${say(profile.cvSummary)}</p>`;
 
-  const stats = profile.stats
-    .map(
-      (stat) =>
-        `<div><dt>${say(stat.label)}</dt><dd class="display">${esc(`${stat.prefix ?? ''}${stat.value}${stat.suffix ?? ''}`)}</dd></div>`,
-    )
-    .join('');
-
   const jobs = profile.experience
     .map(
       (job) => `
@@ -260,8 +260,22 @@ export function renderCv({ profile, lang, t, fontUrl, avatarUrl, siteUrl, phone 
     )
     .join('');
 
+  // A project with a `cvLine` gets one row across the grid; the others get cards.
+  const rows = profile.projects
+    .filter((project) => project.cvLine)
+    .map(
+      (project) => `
+      <article class="row">
+        <p class="label mono">${icon('spark')}<span>${say(project.type)} · ${project.year}</span></p>
+        <h3>${project.demoUrl ? `<a href="${esc(project.demoUrl)}">${esc(project.name)}</a>` : esc(project.name)}</h3>
+        <p class="what">${say(project.cvLine)}${project.repoUrl ? ` <a class="mono repo" href="${esc(project.repoUrl)}">${esc(project.repoUrl.replace(/^https:\/\//, ''))}</a>` : ''}</p>
+        <dl class="metrics">${project.metrics.map((metric) => `<div><dt>${say(metric.label)}</dt><dd>${esc(metric.value)}</dd></div>`).join('')}</dl>
+      </article>`,
+    )
+    .join('');
+
   const projects = profile.projects
-    .filter((project) => project.paper !== false)
+    .filter((project) => !project.cvLine)
     .map(
       (project) => `
       <article class="card">
@@ -300,15 +314,19 @@ export function renderCv({ profile, lang, t, fontUrl, avatarUrl, siteUrl, phone 
           `${esc(skill.name)}${skill.years >= 2 ? `<small class="mono">${skill.years} ${esc(t('unit.years'))}</small>` : ''}`,
       ),
     })),
-    ...(profile.exploring.length > 0
-      ? [{ label: esc(t('skills.exploring')), items: profile.exploring.map(esc) }]
-      : []),
   ]
     .map(
       (group) =>
         `<div class="group"><p class="label mono">${group.label}</p><p>${group.items.map((item, i, all) => `<span>${item}${i < all.length - 1 ? ',' : ''}</span>`).join(' ')}</p></div>`,
     )
     .join('');
+
+  // Under the credentials rather than the skills: that column is about half as tall, and
+  // what is being learned sits naturally next to the certificates.
+  const exploring =
+    profile.exploring.length > 0
+      ? `<div class="explore"><p class="label mono">${esc(t('skills.exploring'))}</p><p>${profile.exploring.map((item, i, all) => `<span>${esc(item)}${i < all.length - 1 ? ',' : ''}</span>`).join(' ')}</p></div>`
+      : '';
 
   const credentials = profile.credentials
     .map(
@@ -339,13 +357,13 @@ ${STYLES}
   <ul class="contact${contacts.length > 5 ? ' dense' : ''}">${contacts.join('')}</ul>
 </header>
 <main>
-  <section class="summary">${heading(labels.profile)}${summary}<dl class="stats">${stats}</dl></section>
+  <section class="summary">${heading(labels.profile)}${summary}</section>
   <section>${heading(t('section.experience'))}${jobs}</section>
-  <section>${heading(t('section.projects'))}<div class="projects">${projects}</div></section>
+  <section>${heading(t('section.projects'))}<div class="projects">${rows}${projects}</div></section>
   <section>${heading(labels.ai)}${aiPanel}</section>
   <div class="split">
     <section>${heading(t('section.skills'))}${skillGroups}</section>
-    <section>${heading(t('experience.credentials'))}<ul class="creds">${credentials}</ul></section>
+    <section>${heading(t('experience.credentials'))}<ul class="creds">${credentials}</ul>${exploring}</section>
   </div>
 </main>
 </body>

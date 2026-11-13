@@ -185,7 +185,7 @@ export function Projects() {
             className={cn(
               'h-full print:mb-5',
               project.ai && 'md:col-span-2 lg:col-span-3',
-              project.paper === false && 'print:hidden',
+              project.print === false && 'print:hidden',
             )}
           >
             <ProjectCard project={project} />
