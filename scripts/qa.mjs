@@ -258,7 +258,7 @@ for (const lang of LANGS) {
     for (const needle of [
       'name="description"',
       `property="og:image" content="`,
-      `/og-${lang}.png"`,
+      `/og-${lang}.png?v=`,
       `property="og:locale" content="${lang === 'vi' ? 'vi_VN' : 'en_US'}"`,
       'hreflang="en"',
       'hreflang="vi"',
@@ -1357,7 +1357,7 @@ for (const [index, slug] of ARTICLES.entries()) {
         `${path}: no link to the other language`,
       );
       // A shared link shows the article's own image (served and sized: see the HTTP checks).
-      const image = new RegExp(`content="https?://[^"]+/og/${slug}-${lang}\\.png"`, 'g');
+      const image = new RegExp(`content="https?://[^"]+/og/${slug}-${lang}\\.png\\?v=[0-9a-z]+"`, 'g');
       assert(
         (html.match(image) ?? []).length === 2,
         `${path}: og:image and twitter:image should both be the article's own image`,

@@ -17,6 +17,42 @@ function articleOf(route: Route): ArticleMeta | undefined {
   return route.kind === 'article' ? findArticle(route.slug) : undefined;
 }
 
+/**
+ * Bump when the look of the link-preview images changes. LinkedIn and others keep an image by
+ * its URL for days, even after the page is scraped again, so each image URL carries a version
+ * made from what is drawn on it: a new title or job title gets a new URL, and a fresh picture.
+ */
+const OG_DESIGN = 1;
+
+/** A short, stable fingerprint of the words drawn on a preview image (FNV-1a, base 36). */
+function ogVersion(parts: readonly (string | number)[]): string {
+  let hash = 0x811c9dc5;
+  for (const char of [OG_DESIGN, ...parts].join('\u0000')) {
+    hash = Math.imul(hash ^ (char.codePointAt(0) ?? 0), 0x01000193) >>> 0;
+  }
+  return hash.toString(36);
+}
+
+/** The home page's preview image (scripts/generate-assets.mjs draws the same words). */
+function homeOgUrl(lang: Lang): string {
+  const words = [profile.seo.ogLabel[lang], profile.name, profile.title[lang], profile.tagline[lang]];
+  return `${siteUrl}/og-${lang}.png?v=${ogVersion(words)}`;
+}
+
+/** An article's own preview image: its title, reading time, and the author's name and title. */
+function articleOgUrl(lang: Lang, article: ArticleMeta): string {
+  const words = [
+    t(lang, 'writing.article'),
+    article.minutes[lang],
+    t(lang, 'unit.minutes'),
+    t(lang, 'article.read'),
+    article.title[lang],
+    profile.name,
+    profile.title[lang],
+  ];
+  return `${siteUrl}${articleOgPath(lang, article.slug)}?v=${ogVersion(words)}`;
+}
+
 export function pageTitle(route: Route): string {
   const article = articleOf(route);
   if (article) return `${article.title[route.lang]} · ${profile.name}`;
@@ -62,7 +98,7 @@ function personJsonLd(lang: Lang): string {
     ...person(lang),
     description: profile.tagline[lang],
     email: `mailto:${profile.email}`,
-    image: `${siteUrl}/og-${lang}.png`,
+    image: homeOgUrl(lang),
     address: { '@type': 'PostalAddress', addressLocality: profile.location[lang] },
     sameAs: profile.socials.map((s) => s.url),
     knowsAbout: allSkills(),
@@ -82,7 +118,7 @@ function articleJsonLd(article: ArticleMeta, lang: Lang): string {
     keywords: article.tags.join(', '),
     url,
     mainEntityOfPage: url,
-    image: `${siteUrl}${articleOgPath(lang, article.slug)}`,
+    image: articleOgUrl(lang, article),
     author: person(lang),
   });
 }
@@ -98,7 +134,7 @@ export function renderHead(route: Route): string {
   const description = pageDescription(route);
   const url = `${siteUrl}${pathFor(route, lang)}`;
   // An article is shared with an image that carries its own title; every other page with the profile's.
-  const og = `${siteUrl}${article ? articleOgPath(lang, article.slug) : `/og-${lang}.png`}`;
+  const og = article ? articleOgUrl(lang, article) : homeOgUrl(lang);
   const ogAlt = article
     ? `${article.title[lang]} · ${profile.name}`
     : `${profile.name} · ${profile.title[lang]}`;
