@@ -1,6 +1,6 @@
 Mỗi sáng, team tôi mở Taiga để trả lời những câu hỏi rất quen: sprint này còn story nào chưa xong, tuần này mỗi người đã làm gì, ai đang giữ issue về hóa đơn. Câu trả lời luôn nằm sẵn trong Taiga, nhưng để có nó thì phải bấm qua vài bảng, lọc vài lần, rồi tự cộng trừ. Trong khi đó, phần lớn công việc hằng ngày của tôi đã diễn ra cùng một trợ lý AI, và trợ lý ấy không nhìn thấy Taiga.
 
-**Model Context Protocol** (MCP) là chuẩn mở để giải đúng khoảng trống đó. Một server MCP khai báo các "tool" cho AI: mỗi tool có tên, một đoạn mô tả và danh sách tham số. AI đọc mô tả, tự chọn tool phù hợp với câu hỏi, gọi nó và đọc kết quả. Tôi viết **taiga-mcp**, một server MCP mã nguồn mở cho Taiga: 14 tool đọc và 3 tool ghi, chạy trên máy hoặc hosted cho cả team tại [taiga.kietnguyen.io.vn](https://taiga.kietnguyen.io.vn).
+**Model Context Protocol** (MCP) là chuẩn mở để giải đúng khoảng trống đó. Một server MCP khai báo các "tool" cho AI: mỗi tool có tên, một đoạn mô tả và danh sách tham số. AI đọc mô tả, tự chọn tool phù hợp với câu hỏi, gọi nó và đọc kết quả. Tôi viết **taiga-mcp**, một server MCP mã nguồn mở cho Taiga: 14 tool đọc và 3 tool ghi, chạy trên máy hoặc hosted cho cả team tại [taiga.kaidev.io.vn](https://taiga.kaidev.io.vn).
 
 Bài này không phải hướng dẫn "hello world" về MCP. Tôi muốn kể lại những quyết định thiết kế không hiển nhiên: viết tool cho một người dùng là model, đọc file lớn mà không làm tràn context, chạy hosted mà không lưu gì, và cho AI quyền ghi mà vẫn ngủ ngon.
 
@@ -157,7 +157,7 @@ Dù vậy, dữ liệu thật vẫn tìm ra những thứ dữ liệu giả bỏ
 
 ## Thử ngay
 
-- Hosted: [taiga.kietnguyen.io.vn](https://taiga.kietnguyen.io.vn). Trong Claude, vào Settings → Connectors → Add custom connector, dán địa chỉ `https://taiga.kietnguyen.io.vn/mcp`, rồi đăng nhập bằng tài khoản Taiga của bạn (Taiga cloud hoặc Taiga riêng của công ty).
+- Hosted: [taiga.kaidev.io.vn](https://taiga.kaidev.io.vn). Trong Claude, vào Settings → Connectors → Add custom connector, dán địa chỉ `https://taiga.kaidev.io.vn/mcp`, rồi đăng nhập bằng tài khoản Taiga của bạn (Taiga cloud hoặc Taiga riêng của công ty).
 - Mã nguồn, giấy phép MIT: [github.com/kiet0807/taiga-mcp](https://github.com/kiet0807/taiga-mcp).
 
 Rồi hỏi bằng lời bình thường: _"Sprint hiện tại còn story nào chưa xong?"_, hoặc, nếu bạn đã tick ô cho phép sửa: _"Tạo task 'Viết release note' cho story 42 và giao cho mình."_

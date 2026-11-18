@@ -785,7 +785,7 @@ export const profile: Profile = {
       },
       // The printed website would reach five pages with this card.
       print: false,
-      demoUrl: 'https://taiga.kietnguyen.io.vn',
+      demoUrl: 'https://taiga.kaidev.io.vn',
       repoUrl: 'https://github.com/kiet0807/taiga-mcp',
       image: {
         src: '/projects/taiga-mcp.webp',

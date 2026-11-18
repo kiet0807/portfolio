@@ -1,6 +1,6 @@
 Every morning my team opens Taiga to answer the same few questions: which stories in this sprint are not done yet, what has each person worked on this week, who holds the issue about invoices. The answers are always in Taiga, but getting them means clicking through a few boards, filtering a few times and doing the sums yourself. Meanwhile, most of my day-to-day work already happens with an AI assistant, and that assistant cannot see Taiga.
 
-The **Model Context Protocol** (MCP) is an open standard for exactly that gap. An MCP server declares "tools" for an AI: each tool has a name, a description and a list of arguments. The AI reads the descriptions, picks the tool that fits the question, calls it and reads the result. I wrote **taiga-mcp**, an open-source MCP server for Taiga: 14 tools that read and 3 that write, running on your machine or hosted for a whole team at [taiga.kietnguyen.io.vn](https://taiga.kietnguyen.io.vn).
+The **Model Context Protocol** (MCP) is an open standard for exactly that gap. An MCP server declares "tools" for an AI: each tool has a name, a description and a list of arguments. The AI reads the descriptions, picks the tool that fits the question, calls it and reads the result. I wrote **taiga-mcp**, an open-source MCP server for Taiga: 14 tools that read and 3 that write, running on your machine or hosted for a whole team at [taiga.kaidev.io.vn](https://taiga.kaidev.io.vn).
 
 This is not a "hello world" MCP tutorial. I want to walk through the design decisions that were not obvious: writing tools for a user that is a model, reading large files without flooding its context, hosting without storing anything, and letting an AI write while still sleeping well.
 
@@ -157,7 +157,7 @@ Even so, real data finds what invented data misses. Run against a real Taiga tha
 
 ## Try it
 
-- Hosted: [taiga.kietnguyen.io.vn](https://taiga.kietnguyen.io.vn). In Claude, open Settings → Connectors → Add custom connector, paste `https://taiga.kietnguyen.io.vn/mcp`, and sign in with your Taiga account (Taiga cloud or your company's own Taiga).
+- Hosted: [taiga.kaidev.io.vn](https://taiga.kaidev.io.vn). In Claude, open Settings → Connectors → Add custom connector, paste `https://taiga.kaidev.io.vn/mcp`, and sign in with your Taiga account (Taiga cloud or your company's own Taiga).
 - Source, MIT license: [github.com/kiet0807/taiga-mcp](https://github.com/kiet0807/taiga-mcp).
 
 Then ask in plain words: _"Which stories in the current sprint are not done yet?"_, or, if you ticked the box that allows changes: _"Create a task 'Write the release notes' on story 42 and assign it to me."_
