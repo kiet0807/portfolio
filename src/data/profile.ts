@@ -251,7 +251,8 @@ export interface Profile {
 /*    onflow.vn (OMS, Fulfillment Connect). Nothing else about the     */
 /*    company is taken from the repositories.                          */
 /*  - What GBST's products are: the public pages on gbst.com.           */
-/*  - Job title and total years: confirmed by the owner.               */
+/*  - Job title and total years: confirmed by the owner (title         */
+/*    corrected to Frontend Developer, the official one, 2026-11-18). */
 /*  - Outcomes at Onflow: release time halved and hotfixes down to     */
 /*    one or two are stated by the owner, not measured. Deploy time    */
 /*    is measured from the OMS repository's GitHub Actions history:    */
@@ -271,7 +272,7 @@ export const profile: Profile = {
   siteUrl: 'https://kietnguyen.io.vn',
   name: 'Kiệt Nguyễn',
   givenName: 'Kiệt',
-  title: { en: 'Senior Frontend Developer', vi: 'Senior Frontend Developer' },
+  title: { en: 'Frontend Developer', vi: 'Frontend Developer' },
   location: { en: 'Ho Chi Minh City, Vietnam', vi: 'TP. Hồ Chí Minh, Việt Nam' },
   coordinates: '10.7769° N, 106.7009° E',
   tagline: {
@@ -316,8 +317,8 @@ export const profile: Profile = {
   timeZone: 'Asia/Ho_Chi_Minh',
   about: [
     {
-      en: "I'm a senior frontend developer based in Ho Chi Minh City. For more than six years I've built production web apps with React and TypeScript: e-commerce storefronts, GBST's wealth-management software for the UK market and, today, the platform behind Onflow Fulfillment.",
-      vi: 'Tôi là senior frontend developer tại TP. Hồ Chí Minh. Hơn sáu năm qua, tôi xây dựng các ứng dụng web chạy thực tế bằng React và TypeScript: từ website thương mại điện tử, phần mềm quản lý tài sản của GBST cho thị trường Anh, đến nền tảng công nghệ của Onflow Fulfillment hiện nay.',
+      en: "I'm a frontend developer based in Ho Chi Minh City. For more than six years I've built production web apps with React and TypeScript: e-commerce storefronts, GBST's wealth-management software for the UK market and, today, the platform behind Onflow Fulfillment.",
+      vi: 'Tôi là frontend developer tại TP. Hồ Chí Minh. Hơn sáu năm qua, tôi xây dựng các ứng dụng web chạy thực tế bằng React và TypeScript: từ website thương mại điện tử, phần mềm quản lý tài sản của GBST cho thị trường Anh, đến nền tảng công nghệ của Onflow Fulfillment hiện nay.',
     },
     {
       en: "At Onflow I'm the primary frontend developer of the OMS that multichannel sellers use to run products, orders, inbound stock and returns across their sales channels. After taking over the codebase I restructured it into feature-based modules, redesigned its UI/UX, migrated it to strict TypeScript and wrote most of its test suite. I also built the Fulfillment Connect console and the shared frontend library from scratch.",
@@ -488,8 +489,8 @@ export const profile: Profile = {
   ],
   cv: { en: '/cv-en.pdf', vi: '/cv-vi.pdf' },
   cvSummary: {
-    en: "Senior frontend developer with 6+ years of experience building production web applications in React and TypeScript, across e-commerce, UK wealth-management software and fulfillment platforms. Primary frontend developer of Onflow's order management system: restructured the codebase, redesigned the UI/UX, migrated it to strict TypeScript and helped cut the release cycle by 50%; built Fulfillment Connect and the shared packages from scratch. Works AI-first with guardrails: about 80% of the code is drafted by AI agents, and every change is specified, reviewed and tested before it ships.",
-    vi: 'Senior Frontend Developer với hơn 6 năm kinh nghiệm xây dựng ứng dụng web production bằng React và TypeScript trong các lĩnh vực thương mại điện tử, quản lý tài sản (thị trường Anh) và fulfillment. Người phát triển chính frontend hệ thống quản lý đơn hàng của Onflow: tái cấu trúc codebase, thiết kế lại UI/UX, chuyển đổi sang TypeScript strict và góp phần rút ngắn 50% chu kỳ release; xây dựng từ đầu Fulfillment Connect và bộ package dùng chung. Làm việc theo hướng AI-first có kiểm soát: khoảng 80% code do AI agent viết nháp, mọi thay đổi đều có đặc tả, được review và kiểm thử trước khi phát hành.',
+    en: "Frontend developer with 6+ years of experience building production web applications in React and TypeScript, across e-commerce, UK wealth-management software and fulfillment platforms. Primary frontend developer of Onflow's order management system: restructured the codebase, redesigned the UI/UX, migrated it to strict TypeScript and helped cut the release cycle by 50%; built Fulfillment Connect and the shared packages from scratch. Works AI-first with guardrails: about 80% of the code is drafted by AI agents, and every change is specified, reviewed and tested before it ships.",
+    vi: 'Frontend Developer với hơn 6 năm kinh nghiệm xây dựng ứng dụng web production bằng React và TypeScript trong các lĩnh vực thương mại điện tử, quản lý tài sản (thị trường Anh) và fulfillment. Người phát triển chính frontend hệ thống quản lý đơn hàng của Onflow: tái cấu trúc codebase, thiết kế lại UI/UX, chuyển đổi sang TypeScript strict và góp phần rút ngắn 50% chu kỳ release; xây dựng từ đầu Fulfillment Connect và bộ package dùng chung. Làm việc theo hướng AI-first có kiểm soát: khoảng 80% code do AI agent viết nháp, mọi thay đổi đều có đặc tả, được review và kiểm thử trước khi phát hành.',
   },
   avatar: { src: '/avatar.webp', width: 512, height: 512 },
   skills: [
@@ -579,7 +580,7 @@ export const profile: Profile = {
   experience: [
     {
       id: 'onflow',
-      role: { en: 'Senior Frontend Developer', vi: 'Senior Frontend Developer' },
+      role: { en: 'Frontend Developer', vi: 'Frontend Developer' },
       company: 'Onflow Fulfillment',
       context: {
         en: 'E-commerce fulfillment service built on its own technology platform: OMS, WMS, TMS and Fulfillment Connect.',
@@ -969,17 +970,17 @@ export const profile: Profile = {
   ],
   seo: {
     title: {
-      en: 'Kiệt Nguyễn · Senior Frontend Developer',
-      vi: 'Kiệt Nguyễn · Senior Frontend Developer',
+      en: 'Kiệt Nguyễn · Frontend Developer',
+      vi: 'Kiệt Nguyễn · Frontend Developer',
     },
     description: {
-      en: 'Kiệt Nguyễn is a senior frontend developer in Ho Chi Minh City with 6+ years in React and TypeScript, building order management and fulfillment software at Onflow.',
-      vi: 'Kiệt Nguyễn là senior frontend developer tại TP. Hồ Chí Minh với hơn 6 năm kinh nghiệm React và TypeScript, đang xây dựng hệ thống quản lý đơn hàng và fulfillment tại Onflow.',
+      en: 'Kiệt Nguyễn is a frontend developer in Ho Chi Minh City with 6+ years in React and TypeScript, building order management and fulfillment software at Onflow.',
+      vi: 'Kiệt Nguyễn là frontend developer tại TP. Hồ Chí Minh với hơn 6 năm kinh nghiệm React và TypeScript, đang xây dựng hệ thống quản lý đơn hàng và fulfillment tại Onflow.',
     },
     ogLabel: { en: 'Portfolio', vi: 'Hồ sơ cá nhân' },
     keywords: {
-      en: ['senior frontend developer', 'React', 'TypeScript', 'order management', 'Ho Chi Minh City'],
-      vi: ['senior frontend developer', 'React', 'TypeScript', 'quản lý đơn hàng', 'TP. Hồ Chí Minh'],
+      en: ['frontend developer', 'React', 'TypeScript', 'order management', 'Ho Chi Minh City'],
+      vi: ['frontend developer', 'React', 'TypeScript', 'quản lý đơn hàng', 'TP. Hồ Chí Minh'],
     },
   },
 };
