@@ -891,18 +891,6 @@ export const profile: Profile = {
       tech: ['Google Apps Script', 'Taiga API', 'Google Sheets'],
     },
     {
-      // Rebuilt in 2026 from the 2020 "Bakery Online Store" (its old repos stay private: they hold credentials).
-      id: 'bakery',
-      year: 2026,
-      name: "Kai's Bakery",
-      description: {
-        en: 'A cake shop in real-time 3D: design a layer cake, slice it to see the layers, watch it get boxed. Vietnamese and English, four colour sets, a test checkout that sends nothing. Rebuilt from a 2020 store.',
-        vi: 'Web tiệm bánh dựng 3D thời gian thực: tự thiết kế bánh nhiều tầng, cắt xem ruột, xem bánh được đóng hộp. Có tiếng Việt và tiếng Anh, 4 bộ màu, đặt thử mà không gửi đơn đi đâu. Làm lại từ cửa hàng năm 2020.',
-      },
-      tech: ['Next.js', 'React Three Fiber', 'Tailwind CSS', 'Playwright'],
-      url: 'https://bakery.kaidev.io.vn',
-    },
-    {
       id: 'diamond-owl',
       year: 2024,
       name: 'Diamond Owl Solution Website',
@@ -943,6 +931,18 @@ export const profile: Profile = {
         vi: 'Sàn giao dịch dịch vụ trực tuyến, render phía server.',
       },
       tech: ['Next.js', 'React Query', 'Material UI'],
+    },
+    {
+      // The 2020 "Bakery Online Store", rebuilt in 2026 (its old repos stay private: they hold credentials).
+      id: 'bakery',
+      year: 2020,
+      name: "Kai's Bakery",
+      description: {
+        en: 'A cake shop in real-time 3D: design a layer cake, slice it to see the layers, watch it get boxed. Vietnamese and English, four colour sets, a test checkout that sends nothing. Rebuilt in 2026.',
+        vi: 'Web tiệm bánh dựng 3D thời gian thực: tự thiết kế bánh nhiều tầng, cắt xem ruột, xem bánh được đóng hộp. Có tiếng Việt và tiếng Anh, 4 bộ màu, đặt thử mà không gửi đơn đi đâu. Được làm lại năm 2026.',
+      },
+      tech: ['Next.js', 'React Three Fiber', 'Tailwind CSS', 'Playwright'],
+      url: 'https://bakery.kaidev.io.vn',
     },
   ],
   // Nothing to list yet: the section (and the "Writing" navigation link) stays hidden while empty.
