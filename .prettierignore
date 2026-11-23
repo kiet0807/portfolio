@@ -5,6 +5,12 @@ pnpm-lock.yaml
 public/*.png
 public/*.ico
 .lighthouse
+.impeccable
+.ai
+HANDOFF.md
+PLAN.md
+REVIEW-PROMPT*.md
+BAO-CAO-REVIEW-*.md
 .cv
 private
 server/knowledge.js

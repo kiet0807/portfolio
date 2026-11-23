@@ -1,0 +1,29 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-11-23T14:35:55.470Z",
+        "reason": "project design since the first build: README 'Font' section documents Inter for body text, self-hosted under OFL; not changed in this session"
+      },
+      {
+        "rule": "overused-font",
+        "value": "space grotesk",
+        "createdAt": "2026-11-23T14:35:55.544Z",
+        "reason": "project design since the first build: README 'Font' section documents Space Grotesk for headings and large numbers; not changed in this session"
+      },
+      {
+        "rule": "gradient-text",
+        "value": "*",
+        "files": [
+          "src/styles.css"
+        ],
+        "createdAt": "2026-11-23T14:36:04.550Z",
+        "reason": "project design: the gradient name accent (text-gradient, text-gradient-ai utilities) is the site's signature in the hero, CV and OG image, documented in README; pre-existing"
+      }
+    ]
+  }
+}

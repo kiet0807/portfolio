@@ -23,7 +23,9 @@ public/site.webmanifest
 # the CV with a phone number, and the number itself (pnpm cv:private)
 private
 .vercel
-.env*
 # working notes kept on this machine only
+.ai
 HANDOFF.md
 PLAN.md
+REVIEW-PROMPT*.md
+BAO-CAO-REVIEW-*.md
