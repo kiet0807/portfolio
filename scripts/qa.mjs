@@ -2495,6 +2495,39 @@ await check('render loop pauses when the hero is off-screen or the tab is hidden
   }
 });
 
+await check('pausing motion takes the 3D scene down, and resuming brings it back', async () => {
+  if (!canRun3D) return SKIP_3D;
+  const { page, problems, close } = await open('/en', { width: 1280 });
+  const mode = () =>
+    page.evaluate(() => document.querySelector('[data-hero-visual]')?.getAttribute('data-hero-visual'));
+  try {
+    await page.waitForFunction(
+      () => document.querySelector('[data-hero-visual]')?.getAttribute('data-hero-visual') === '3d',
+      { timeout: 15000 },
+    );
+    await page.evaluate(() => document.querySelector('[data-motion-toggle]').click());
+    await page.waitForFunction(
+      () => document.querySelector('[data-hero-visual]')?.getAttribute('data-hero-visual') === 'static',
+      { timeout: 5000 },
+    );
+    // R3F drops the WebGL context of a scene it takes down, a moment later: that must not count as a failure.
+    await sleep(1200);
+    await page.evaluate(() => document.querySelector('[data-motion-toggle]').click());
+    await page
+      .waitForFunction(
+        () => document.querySelector('[data-hero-visual]')?.getAttribute('data-hero-visual') === '3d',
+        { timeout: 15000 },
+      )
+      .catch(() => {});
+    assert((await mode()) === '3d', 'the scene did not come back after motion was resumed');
+    const errors = problems.filter((p) => p.startsWith('pageerror'));
+    assert(errors.length === 0, errors.join('\n'));
+  } finally {
+    await page.evaluate(() => localStorage.removeItem('portfolio:motion')).catch(() => {});
+    await close();
+  }
+});
+
 await check('lost WebGL context falls back to the static visual', async () => {
   if (!canRun3D) return SKIP_3D;
   const { page, problems, close } = await open('/en', { width: 1280 });

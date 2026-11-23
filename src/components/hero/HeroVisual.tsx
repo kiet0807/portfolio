@@ -1,9 +1,11 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { SceneErrorBoundary } from './SceneErrorBoundary';
+import { SCENE_TOUCHED_EVENT } from './sceneEvents';
 import { useInViewport } from '@/hooks/useInViewport';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { usePageVisible } from '@/hooks/usePageVisible';
 import { profile } from '@/data/profile';
+import { useLang } from '@/i18n/useLang';
 import { cn } from '@/lib/cn';
 import { isLowEndDevice, readDeviceSignals } from '@/lib/device';
 import { useMotionPaused } from '@/lib/motion';
@@ -75,8 +77,16 @@ interface HudProps {
  * render mode shows what is on screen, and X / Y are the pointer vector the sphere leans toward.
  */
 function Hud({ webgl, live }: HudProps) {
+  const { t } = useLang();
   const xRef = useRef<HTMLSpanElement>(null);
   const yRef = useRef<HTMLSpanElement>(null);
+  // The scene can be dragged and clicked; say so until the visitor has tried it once.
+  const [touched, setTouched] = useState(false);
+  useEffect(() => {
+    const onTouched = () => setTouched(true);
+    window.addEventListener(SCENE_TOUCHED_EVENT, onTouched, { once: true });
+    return () => window.removeEventListener(SCENE_TOUCHED_EVENT, onTouched);
+  }, []);
 
   // Rewrites two text nodes at most once per frame; nothing re-renders.
   useEffect(() => {
@@ -116,8 +126,10 @@ function Hud({ webgl, live }: HudProps) {
           strokeWidth="0.5"
           strokeDasharray="1 5"
         />
+        {/* Ticks on the diagonals: at rest they sit between the readouts, never across them. */}
         <path
           d="M100 0v7M200 100h-7M100 200v-7M0 100h7"
+          transform="rotate(45 100 100)"
           stroke="currentColor"
           strokeOpacity="0.8"
           strokeWidth="0.7"
@@ -131,10 +143,11 @@ function Hud({ webgl, live }: HudProps) {
         {profile.coordinates}
       </p>
       <p className="absolute bottom-0 left-1/2 hidden -translate-x-1/2 translate-y-1/2 items-center gap-3 px-2 font-mono text-[0.6875rem] tracking-wider whitespace-nowrap text-muted tabular-nums sm:flex">
-        <span>
+        {/* The pointer readout means nothing on a touch screen. */}
+        <span className="hidden pointer-fine:inline">
           X <span ref={xRef}>+0.00</span>
         </span>
-        <span>
+        <span className="hidden pointer-fine:inline">
           Y <span ref={yRef}>+0.00</span>
         </span>
         <span className="flex items-center gap-1.5 text-link">
@@ -143,8 +156,18 @@ function Hud({ webgl, live }: HudProps) {
         </span>
       </p>
       {/* What the picture shows: orders moving between sales channels and warehouses. */}
-      <p className="absolute top-1/2 left-0 hidden origin-center -translate-x-1/2 -translate-y-1/2 -rotate-90 px-2 font-mono text-[0.6875rem] tracking-[0.2em] whitespace-nowrap text-muted lg:block">
+      <p className="absolute top-1/2 left-0 hidden origin-center -translate-x-1/2 -translate-y-1/2 -rotate-90 px-2 font-mono text-[0.6875rem] tracking-[0.2em] whitespace-nowrap text-muted md:block">
         ORDER FLOW
+      </p>
+      {/* Its mirror on the right, while the live scene waits for a first drag or click. */}
+      <p
+        data-hint-3d=""
+        className={cn(
+          'absolute top-1/2 right-0 hidden origin-center translate-x-1/2 -translate-y-1/2 rotate-90 px-2 font-mono text-[0.6875rem] tracking-[0.2em] whitespace-nowrap text-link uppercase transition-opacity duration-700 md:block',
+          webgl && !touched ? 'opacity-80' : 'opacity-0',
+        )}
+      >
+        {t('hero.hint3d')}
       </p>
     </div>
   );
@@ -171,7 +194,11 @@ export function HeroVisual() {
   useEffect(
     () =>
       whenLoadedAndIdle(() => {
-        if (!isLowEndDevice(readDeviceSignals())) setCapable(true);
+        // The width is left to `wide` below, which follows the window: a page opened narrow
+        // and widened afterwards still gets the scene. Narrow pages never load the chunk.
+        if (!isLowEndDevice({ ...readDeviceSignals(), viewportWidth: Number.POSITIVE_INFINITY })) {
+          setCapable(true);
+        }
       }),
     [],
   );
@@ -193,13 +220,15 @@ export function HeroVisual() {
 
       {/*
         Static water drop: the fallback, and the placeholder while the 3D chunk loads.
+        From 768px, where the scene may take over, it is the size the 3D core is drawn at,
+        so the cross-fade does not jump.
         Two lopsided shapes turn slowly in opposite directions, so the outline keeps
         changing like a liquid; the lighting layer on top stays still. Only `transform`
         animates, which keeps it cheap on phones (where this is what people see).
       */}
       <div
         className={cn(
-          'absolute inset-[16%] animate-float transition-opacity duration-700',
+          'absolute inset-[16%] animate-float transition-opacity duration-700 md:inset-[26%]',
           sceneVisible ? 'opacity-0' : 'opacity-100',
         )}
       >
@@ -265,7 +294,7 @@ export function HeroVisual() {
       ) : null}
 
       {/* On top of the drop, so the labels are never covered by the canvas. */}
-      <Hud webgl={sceneVisible} live={inView && pageVisible} />
+      <Hud webgl={sceneVisible} live={inView && pageVisible && !reducedMotion && !paused} />
     </div>
   );
 }

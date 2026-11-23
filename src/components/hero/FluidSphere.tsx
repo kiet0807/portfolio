@@ -1,6 +1,17 @@
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
-import { Color, Vector2, Vector3, Vector4, type IUniform, type Mesh, type ShaderMaterial } from 'three';
+import {
+  BufferGeometry,
+  Color,
+  Float32BufferAttribute,
+  IcosahedronGeometry,
+  Quaternion,
+  Vector3,
+  Vector4,
+  type IUniform,
+  type Mesh,
+  type ShaderMaterial,
+} from 'three';
 import type { SceneBus } from './sceneBus';
 import { fragmentShader, PULSE_SLOTS, vertexShader } from './shaders';
 
@@ -8,7 +19,7 @@ import { fragmentShader, PULSE_SLOTS, vertexShader } from './shaders';
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type SphereUniforms = {
   uTime: IUniform<number>;
-  uPointer: IUniform<Vector2>;
+  uToward: IUniform<Vector3>;
   uPulses: IUniform<Vector4[]>;
   uDeep: IUniform<Color>;
   uMid: IUniform<Color>;
@@ -21,13 +32,45 @@ const RIPPLE_GAP_S = 0.9;
 function createUniforms(): SphereUniforms {
   return {
     uTime: { value: 0 },
-    uPointer: { value: new Vector2(0, 0) },
+    uToward: { value: new Vector3(0, 0, 1) },
     uPulses: { value: Array.from({ length: PULSE_SLOTS }, () => new Vector4(0, 0, 0, -100)) },
     // Water palette: navy → primary blue → cyan.
     uDeep: { value: new Color('#0b1f3a') },
     uMid: { value: new Color('#2563eb') },
     uLight: { value: new Color('#22d3ee') },
   };
+}
+
+/**
+ * The icosphere with its shared corners merged: three builds it as separate triangles
+ * (65,340 vertices at detail 32), so every vertex would run the noise shader six times.
+ * Indexed, the same surface has about 10,000. Only positions are kept: the shader
+ * derives everything else.
+ */
+function indexedIcosphere(detail: number): BufferGeometry {
+  const source = new IcosahedronGeometry(1, detail);
+  const position = source.getAttribute('position');
+  const seen = new Map<string, number>();
+  const points: number[] = [];
+  const index: number[] = [];
+  for (let i = 0; i < position.count; i += 1) {
+    const x = position.getX(i);
+    const y = position.getY(i);
+    const z = position.getZ(i);
+    const key = `${Math.round(x * 1e5)},${Math.round(y * 1e5)},${Math.round(z * 1e5)}`;
+    let at = seen.get(key);
+    if (at === undefined) {
+      at = points.length / 3;
+      seen.set(key, at);
+      points.push(x, y, z);
+    }
+    index.push(at);
+  }
+  source.dispose();
+  const geometry = new BufferGeometry();
+  geometry.setAttribute('position', new Float32BufferAttribute(points, 3));
+  geometry.setIndex(index);
+  return geometry;
 }
 
 /**
@@ -41,8 +84,11 @@ export function FluidSphere({ bus }: { bus: SceneBus }) {
   const eased = useRef({ x: 0, y: 0 });
   const lastRipple = useRef(-100);
   const local = useRef(new Vector3());
+  const turn = useRef(new Quaternion());
 
   const uniforms = useMemo(() => createUniforms(), []);
+  const geometry = useMemo(() => indexedIcosphere(32), []);
+  useEffect(() => () => geometry.dispose(), [geometry]);
 
   useEffect(() => {
     const onMove = (e: PointerEvent) => {
@@ -66,9 +112,14 @@ export function FluidSphere({ bus }: { bus: SceneBus }) {
 
     const now = live.uTime.value + dt;
     live.uTime.value = now;
-    live.uPointer.value.set(eased.current.x, eased.current.y);
     mesh.rotation.x = -eased.current.y * 0.22;
     mesh.rotation.y = eased.current.x * 0.3;
+    // The pointer, seen from the camera, turned into the sphere's own space (it may have been spun).
+    mesh.getWorldQuaternion(turn.current).invert();
+    live.uToward.value
+      .set(eased.current.x * 1.1, eased.current.y * 1.1, 1)
+      .normalize()
+      .applyQuaternion(turn.current);
 
     // Arrivals become ripples, from the point of the core nearest to where the order landed.
     const pulses = live.uPulses.value;
@@ -88,8 +139,7 @@ export function FluidSphere({ bus }: { bus: SceneBus }) {
   });
 
   return (
-    <mesh ref={meshRef}>
-      <icosahedronGeometry args={[1, 32]} />
+    <mesh ref={meshRef} geometry={geometry}>
       <shaderMaterial
         ref={materialRef}
         uniforms={uniforms}

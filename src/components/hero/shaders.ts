@@ -57,7 +57,8 @@ export const PULSE_SLOTS = 4;
 
 export const vertexShader = /* glsl */ `
 uniform float uTime;
-uniform vec2 uPointer;
+// Where the pointer is, as a direction in the sphere's own space (so it stays right after a drag).
+uniform vec3 uToward;
 // Arrivals: direction from the centre (length = strength) and start time; strength 0 = unused.
 uniform vec4 uPulses[${PULSE_SLOTS}];
 varying vec3 vNormal;
@@ -67,7 +68,8 @@ varying float vRipple;
 
 ${SIMPLEX_NOISE}
 
-// Rings travelling over the surface away from where orders arrived, fading as they go.
+// Rings travelling over the surface away from where orders arrived, fading as they go. Several
+// at once saturate toward 1 instead of adding up, so quick clicks never burn the core white.
 float ripple(vec3 n) {
   float r = 0.0;
   for (int i = 0; i < ${PULSE_SLOTS}; i++) {
@@ -79,11 +81,11 @@ float ripple(vec3 n) {
     float d = angle - age * 1.5;
     r += strength * exp(-d * d * 28.0) * exp(-age * 1.3);
   }
-  return r;
+  return 1.0 - exp(-r);
 }
 
-// Height of the liquid surface above the unit sphere at direction n.
-float field(vec3 n) {
+// Height of the liquid surface above the unit sphere at direction n, given its ripple r.
+float field(vec3 n, float r) {
   float t = uTime * 0.26;
   // Slowly rotate the noise domain around Y: reads as the sphere turning.
   float a = uTime * 0.11;
@@ -92,15 +94,14 @@ float field(vec3 n) {
   float h = snoise(q * 0.9 + vec3(0.0, t, t * 0.6)) * 0.2;
   h += snoise(q * 1.9 - vec3(t * 0.9, 0.0, t * 0.4)) * 0.03;
   // Gentle swell toward the pointer.
-  vec3 toward = normalize(vec3(uPointer * 1.1, 1.0));
-  h += 0.1 * smoothstep(0.25, 1.0, dot(n, toward));
-  h += 0.05 * ripple(n);
+  h += 0.1 * smoothstep(0.25, 1.0, dot(n, uToward));
+  h += 0.05 * r;
   return h;
 }
 
 vec3 surface(vec3 p) {
   vec3 n = normalize(p);
-  return n * (1.0 + field(n));
+  return n * (1.0 + field(n, ripple(n)));
 }
 
 void main() {
@@ -109,14 +110,16 @@ void main() {
   vec3 t1 = normalize(cross(n0, axis));
   vec3 t2 = cross(n0, t1);
 
-  vec3 p = surface(n0);
+  // The vertex's own ripple is computed once: it shapes the surface and lights the ring.
+  float r0 = ripple(n0);
+  vec3 p = n0 * (1.0 + field(n0, r0));
   vec3 pa = surface(n0 + t1 * 0.02);
   vec3 pb = surface(n0 + t2 * 0.02);
   vec3 n = normalize(cross(pa - p, pb - p));
   if (dot(n, n0) < 0.0) n = -n;
 
   vWave = length(p) - 1.0;
-  vRipple = ripple(n0);
+  vRipple = r0;
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   vViewPosition = mv.xyz;
   vNormal = normalize(normalMatrix * n);
@@ -148,8 +151,8 @@ void main() {
   vec3 base = mix(uDeep, uMid, clamp(crest * 0.5 + diffuse * 0.62, 0.0, 1.0));
   vec3 color = mix(base, uLight, fresnel * 0.9);
   color += vec3(1.0) * spec * 0.7 + uLight * spec2 * 0.22;
-  // An arriving order: a faint ring of light travels over the surface.
-  color += uLight * clamp(vRipple, 0.0, 1.5) * 0.35;
+  // An order entering the core: a ring of light travels over the surface.
+  color += uLight * vRipple * 0.5;
 
   gl_FragColor = vec4(color, 1.0);
   #include <tonemapping_fragment>
@@ -185,6 +188,73 @@ void main() {
   float alpha = smoothstep(0.5, 0.2, d) * mix(0.16, 0.95, vNear);
   if (alpha < 0.01) discard;
   gl_FragColor = vec4(uColor, alpha);
+  #include <tonemapping_fragment>
+  #include <colorspace_fragment>
+}
+`;
+
+/*
+ * The shell of nodes. Ordinary nodes are soft dots; the hubs say what they are: a sales
+ * channel is a ring around a bright centre, a warehouse a diamond.
+ */
+export const shellVertexShader = /* glsl */ `
+attribute float aSize;
+attribute float aKind;
+uniform float uPixelRatio;
+varying float vNear;
+varying float vKind;
+
+void main() {
+  vec4 mv = modelViewMatrix * vec4(position, 1.0);
+  vNear = smoothstep(-5.9, -3.3, mv.z);
+  vKind = aKind;
+  gl_PointSize = aSize * uPixelRatio * (4.6 / -mv.z);
+  gl_Position = projectionMatrix * mv;
+}
+`;
+
+export const shellFragmentShader = /* glsl */ `
+uniform vec3 uColor;
+varying float vNear;
+varying float vKind;
+
+void main() {
+  vec2 c = gl_PointCoord - 0.5;
+  float shape;
+  if (vKind > 1.5) {
+    shape = smoothstep(0.5, 0.38, abs(c.x) + abs(c.y));
+  } else if (vKind > 0.5) {
+    float r = length(c);
+    shape = max(smoothstep(0.2, 0.12, r), smoothstep(0.5, 0.42, r) * smoothstep(0.25, 0.33, r));
+  } else {
+    shape = smoothstep(0.5, 0.2, length(c));
+  }
+  float alpha = shape * mix(0.16, 0.95, vNear);
+  if (alpha < 0.01) discard;
+  gl_FragColor = vec4(uColor, alpha);
+  #include <tonemapping_fragment>
+  #include <colorspace_fragment>
+}
+`;
+
+/* Routes: crisp in front of the core, faint behind it, so the network reads in depth. */
+export const arcVertexShader = /* glsl */ `
+varying float vNear;
+
+void main() {
+  vec4 mv = modelViewMatrix * vec4(position, 1.0);
+  vNear = smoothstep(-5.9, -3.3, mv.z);
+  gl_Position = projectionMatrix * mv;
+}
+`;
+
+export const arcFragmentShader = /* glsl */ `
+uniform vec3 uColor;
+uniform float uOpacity;
+varying float vNear;
+
+void main() {
+  gl_FragColor = vec4(uColor, uOpacity * mix(0.16, 1.0, vNear));
   #include <tonemapping_fragment>
   #include <colorspace_fragment>
 }

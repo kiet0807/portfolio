@@ -4,6 +4,7 @@ import type { Group } from 'three';
 import { FluidSphere } from './FluidSphere';
 import { OrderNetwork } from './OrderNetwork';
 import { createSceneBus, type SceneBus } from './sceneBus';
+import { SCENE_TOUCHED_EVENT } from './sceneEvents';
 import { createFpsMeter, type FpsMeter } from '@/lib/fps';
 
 interface Scene3DProps {
@@ -75,6 +76,7 @@ function DragSpin({ bus, children }: { bus: SceneBus; children: ReactNode }) {
       state.downAt = event.timeStamp;
       state.speed = 0;
       canvas.setPointerCapture(event.pointerId);
+      window.dispatchEvent(new Event(SCENE_TOUCHED_EVENT));
     };
     const onMove = (event: PointerEvent) => {
       if (event.pointerId !== state.pointer) return;
@@ -123,19 +125,31 @@ function DragSpin({ bus, children }: { bus: SceneBus; children: ReactNode }) {
 export default function Scene3D({ active, onReady, onFail }: Scene3DProps) {
   const [maxDpr, setMaxDpr] = useState(MAX_DPR);
   const [bus] = useState(createSceneBus);
+  // Taking the scene down (motion paused, window narrowed) makes R3F drop the WebGL context on
+  // purpose, a moment later. That loss must not count as a failure, or the scene never returns.
+  const leaving = useRef(false);
+  const stopWatching = useRef<(() => void) | null>(null);
 
-  useEffect(() => () => onReady(false), [onReady]);
+  useEffect(() => {
+    leaving.current = false;
+    return () => {
+      leaving.current = true;
+      stopWatching.current?.();
+      stopWatching.current = null;
+      onReady(false);
+    };
+  }, [onReady]);
 
   const onCreated = useCallback(
     ({ gl }: RootState) => {
-      gl.domElement.addEventListener(
-        'webglcontextlost',
-        (event) => {
-          event.preventDefault();
-          onFail();
-        },
-        { once: true },
-      );
+      const canvas = gl.domElement;
+      const onLost = (event: Event) => {
+        if (leaving.current) return;
+        event.preventDefault();
+        onFail();
+      };
+      canvas.addEventListener('webglcontextlost', onLost, { once: true });
+      stopWatching.current = () => canvas.removeEventListener('webglcontextlost', onLost);
       onReady(true);
     },
     [onFail, onReady],

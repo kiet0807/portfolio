@@ -260,7 +260,7 @@ Các trường hợp còn lại, và khi WebGL lỗi hoặc chạy quá chậm, 
 
 Hình 3D vẽ lại câu tagline: lõi chất lỏng ở giữa, bao quanh là một lớp vỏ gồm các nút (kênh bán và kho), và những "đơn hàng" chạy theo các cung nối giữa các nút lớn. Số nút, số tuyến và tốc độ chỉnh ở đầu [`src/components/hero/OrderNetwork.tsx`](src/components/hero/OrderNetwork.tsx). Mạng lưới được dựng cố định (không ngẫu nhiên) nên lần nào vào trang cũng giống nhau.
 
-Mỗi đơn hàng là một chấm sáng kéo đuôi. Đơn tới một nút lớn thì nút đó lóe lên, và trên lõi một vòng sáng mờ lan ra từ phía nút đó (tối đa khoảng một vòng mỗi giây). Bấm vào khối cầu thì một loạt đơn bay từ mặt trước của lõi tỏa ra mọi nút lớn. Kéo chuột ngang để xoay cả khối cầu và mạng lưới; buông tay thì nó quay chậm dần rồi dừng. Trên màn cảm ứng, vuốt dọc vẫn cuộn trang. Các phần của cảnh báo cho nhau qua [`sceneBus.ts`](src/components/hero/sceneBus.ts): mạng lưới báo chỗ đơn tới, lõi gợn sóng từ đó; `DragSpin` trong [`Scene3D.tsx`](src/components/hero/Scene3D.tsx) báo cú bấm.
+Mười hai nút lớn nói rõ vai trò: sáu **kênh bán** là vòng tròn có tâm sáng, sáu **kho** là hình thoi. Sáu luồng đơn đi từ một kênh bán vào lõi (lõi gợn một vòng sáng ở chỗ đơn chạm vào), khuất bên trong, rồi ló ra phía bên kia và bay tới một kho (kho lóe sáng); năm tuyến còn lại nối thẳng các nút với nhau. Mỗi đơn là một vệt sáng liền nét; đường nối rõ ở phía trước lõi và mờ dần phía sau. Bấm vào khối cầu thì một loạt đơn bay từ lõi tỏa ra mọi nút lớn (bấm liên tục: tối đa ba loạt cùng lúc; vòng sáng trên lõi bão hòa dần chứ không cộng dồn). Kéo chuột ngang để xoay cả cảnh; buông tay thì nó quay chậm dần rồi dừng. Trên màn cảm ứng, vuốt dọc vẫn cuộn trang. Cho tới lần kéo hay bấm đầu, khung HUD có dòng gợi ý "Kéo · Bấm". Các phần của cảnh báo cho nhau qua [`sceneBus.ts`](src/components/hero/sceneBus.ts): mạng lưới báo chỗ đơn vào lõi, lõi gợn sóng từ đó; `DragSpin` trong [`Scene3D.tsx`](src/components/hero/Scene3D.tsx) báo cú bấm. Lưới hình cầu của lõi là icosphere đã gộp đỉnh trùng (khoảng 10 nghìn đỉnh thay vì 65 nghìn), nên shader chạy ít hơn khoảng 6 lần cho cùng một hình.
 
 ## Deploy lên Vercel
 
@@ -315,19 +315,19 @@ Vercel tự phục vụ `dist/404.html` với mã trạng thái 404 cho mọi đ
 
 Đo ngày 23/11/2026 trên bản build production, chạy cục bộ (macOS, Apple M4, Chrome, Node 24), nội dung thật trong `profile.ts`. Kết quả sau khi deploy có thể khác theo mạng và máy chủ; chạy lại `pnpm qa` và `pnpm lighthouse` để có số của bạn.
 
-| Hạng mục                                           | Kết quả                                                                                                                                                |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `pnpm typecheck`, `pnpm lint`, `pnpm format:check` | Đạt, 0 lỗi, 0 warning                                                                                                                                  |
-| `pnpm test`                                        | 177/177 test đạt                                                                                                                                       |
-| `pnpm build`                                       | Đạt, không warning                                                                                                                                     |
-| JS tải ban đầu                                     | 141.0 KB gzip (ngân sách 150 KB). Tải lười: chunk 3D 232.4 KB, bảng chat 3.5 KB, bảng lệnh 3.0 KB, mỗi bài viết 3.4 đến 6.5 KB, bộ đọc Markdown 1.4 KB |
-| `pnpm qa`                                          | 86/86 kiểm tra đạt, ở 7 độ rộng từ 320px đến 2560px. Phần AI của chatbot chạy với một máy chủ giả lập Gemini                                           |
-| Lighthouse mobile `/en`                            | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                     |
-| Lighthouse mobile `/vi`                            | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                     |
-| Lighthouse mobile 6 trang bài viết (`/en`, `/vi`)  | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                     |
-| In trang (Ctrl/Cmd + P)                            | 4 trang A4 mỗi ngôn ngữ, nền sáng, không còn phần nào bị ẩn                                                                                            |
-| `pnpm cv`                                          | 2 trang A4 mỗi ngôn ngữ, cỡ chữ 8pt (Anh) và 8.1pt (Việt)                                                                                              |
-| Chế độ tương phản cao (giả lập)                    | Nút có viền, mục đang chọn phân biệt được                                                                                                              |
+| Hạng mục                                           | Kết quả                                                                                                                                              |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm typecheck`, `pnpm lint`, `pnpm format:check` | Đạt, 0 lỗi, 0 warning                                                                                                                                |
+| `pnpm test`                                        | 177/177 test đạt                                                                                                                                     |
+| `pnpm build`                                       | Đạt, không warning                                                                                                                                   |
+| JS tải ban đầu                                     | 141.2 KB gzip (ngân sách 150 KB). Tải lười: chunk 3D 235 KB, bảng chat 3.5 KB, bảng lệnh 3.0 KB, mỗi bài viết 3.4 đến 6.5 KB, bộ đọc Markdown 1.4 KB |
+| `pnpm qa`                                          | 87/87 kiểm tra đạt, ở 7 độ rộng từ 320px đến 2560px. Phần AI của chatbot chạy với một máy chủ giả lập Gemini                                         |
+| Lighthouse mobile `/en`                            | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                   |
+| Lighthouse mobile `/vi`                            | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                   |
+| Lighthouse mobile 6 trang bài viết (`/en`, `/vi`)  | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                   |
+| In trang (Ctrl/Cmd + P)                            | 4 trang A4 mỗi ngôn ngữ, nền sáng, không còn phần nào bị ẩn                                                                                          |
+| `pnpm cv`                                          | 2 trang A4 mỗi ngôn ngữ, cỡ chữ 8pt (Anh) và 8.1pt (Việt)                                                                                            |
+| Chế độ tương phản cao (giả lập)                    | Nút có viền, mục đang chọn phân biệt được                                                                                                            |
 
 Chưa kiểm tra: trình duyệt Safari và Firefox, thiết bị di động thật, trình đọc màn hình thật, máy in thật và chế độ tương phản cao trên Windows thật. Phần in và tương phản cao mới chỉ được kiểm tra bằng chế độ giả lập của Chrome.
 
