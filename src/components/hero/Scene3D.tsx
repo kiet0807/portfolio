@@ -2,6 +2,7 @@ import { Canvas, useFrame, type RootState } from '@react-three/fiber';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FluidSphere } from './FluidSphere';
 import { OrderNetwork } from './OrderNetwork';
+import { createFpsMeter, type FpsMeter } from '@/lib/fps';
 
 interface Scene3DProps {
   /** Render loop runs only while true (hero on screen and tab visible). */
@@ -22,39 +23,13 @@ interface FpsGuardProps {
  * ratio once; still too slow → give up and let the static backdrop take over.
  */
 function FpsGuard({ onDegrade, onFail }: FpsGuardProps) {
-  const state = useRef({ warmup: 0, frames: 0, time: 0, stage: 0, done: false });
+  const meter = useRef<FpsMeter | null>(null);
 
   useFrame((_, delta) => {
-    const s = state.current;
-    if (s.done) return;
-    if (delta > 0.25) {
-      // Loop was paused (off-screen / hidden tab): restart the measurement.
-      s.warmup = 0;
-      s.frames = 0;
-      s.time = 0;
-      return;
-    }
-    if (s.warmup < 1) {
-      s.warmup += delta;
-      return;
-    }
-    s.frames += 1;
-    s.time += delta;
-    if (s.time < 2) return;
-
-    const fps = s.frames / s.time;
-    s.warmup = 0;
-    s.frames = 0;
-    s.time = 0;
-    if (fps >= 30) {
-      s.done = true;
-    } else if (s.stage === 0) {
-      s.stage = 1;
-      onDegrade();
-    } else {
-      s.done = true;
-      onFail();
-    }
+    meter.current ??= createFpsMeter();
+    const verdict = meter.current.sample(delta);
+    if (verdict === 'degrade') onDegrade();
+    else if (verdict === 'fail') onFail();
   });
 
   return null;
