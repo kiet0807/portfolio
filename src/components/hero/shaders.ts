@@ -52,14 +52,35 @@ float snoise(vec3 v) {
 }
 `;
 
+/** How many arrivals can ripple across the core at once (FluidSphere keeps the newest). */
+export const PULSE_SLOTS = 4;
+
 export const vertexShader = /* glsl */ `
 uniform float uTime;
 uniform vec2 uPointer;
+// Arrivals: direction from the centre (length = strength) and start time; strength 0 = unused.
+uniform vec4 uPulses[${PULSE_SLOTS}];
 varying vec3 vNormal;
 varying vec3 vViewPosition;
 varying float vWave;
+varying float vRipple;
 
 ${SIMPLEX_NOISE}
+
+// Rings travelling over the surface away from where orders arrived, fading as they go.
+float ripple(vec3 n) {
+  float r = 0.0;
+  for (int i = 0; i < ${PULSE_SLOTS}; i++) {
+    vec4 pulse = uPulses[i];
+    float strength = length(pulse.xyz);
+    float age = uTime - pulse.w;
+    if (strength < 0.001 || age < 0.0 || age > 2.6) continue;
+    float angle = acos(clamp(dot(n, pulse.xyz / strength), -1.0, 1.0));
+    float d = angle - age * 1.5;
+    r += strength * exp(-d * d * 28.0) * exp(-age * 1.3);
+  }
+  return r;
+}
 
 // Height of the liquid surface above the unit sphere at direction n.
 float field(vec3 n) {
@@ -73,6 +94,7 @@ float field(vec3 n) {
   // Gentle swell toward the pointer.
   vec3 toward = normalize(vec3(uPointer * 1.1, 1.0));
   h += 0.1 * smoothstep(0.25, 1.0, dot(n, toward));
+  h += 0.05 * ripple(n);
   return h;
 }
 
@@ -94,6 +116,7 @@ void main() {
   if (dot(n, n0) < 0.0) n = -n;
 
   vWave = length(p) - 1.0;
+  vRipple = ripple(n0);
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   vViewPosition = mv.xyz;
   vNormal = normalize(normalMatrix * n);
@@ -105,10 +128,10 @@ export const fragmentShader = /* glsl */ `
 uniform vec3 uDeep;
 uniform vec3 uMid;
 uniform vec3 uLight;
-uniform vec3 uAccent;
 varying vec3 vNormal;
 varying vec3 vViewPosition;
 varying float vWave;
+varying float vRipple;
 
 void main() {
   vec3 N = normalize(vNormal);
@@ -123,16 +146,10 @@ void main() {
 
   float crest = smoothstep(-0.2, 0.26, vWave);
   vec3 base = mix(uDeep, uMid, clamp(crest * 0.5 + diffuse * 0.62, 0.0, 1.0));
-  // Thin-film rim: the edge drifts between cyan and violet with the viewing angle and the
-  // waves, like light on a soap bubble; the face keeps the water palette.
-  float film = 0.5 + 0.5 * sin((fresnel * 1.6 + vWave * 1.2) * 3.0 + 1.2);
-  vec3 rim = mix(uLight, uAccent, film * 0.7);
-  vec3 color = mix(base, rim, fresnel * 0.9);
+  vec3 color = mix(base, uLight, fresnel * 0.9);
   color += vec3(1.0) * spec * 0.7 + uLight * spec2 * 0.22;
-  // A studio window above: a soft band in the reflection, sharper near its middle, for a glassy look.
-  vec3 R = reflect(-V, N);
-  float sky = smoothstep(0.3, 0.85, R.y);
-  color += uLight * sky * 0.1 + vec3(1.0) * pow(sky, 6.0) * 0.16;
+  // An arriving order: a faint ring of light travels over the surface.
+  color += uLight * clamp(vRipple, 0.0, 1.5) * 0.35;
 
   gl_FragColor = vec4(color, 1.0);
   #include <tonemapping_fragment>

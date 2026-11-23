@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import type { Group } from 'three';
 import { FluidSphere } from './FluidSphere';
 import { OrderNetwork } from './OrderNetwork';
+import { createSceneBus, type SceneBus } from './sceneBus';
 import { createFpsMeter, type FpsMeter } from '@/lib/fps';
 
 interface Scene3DProps {
@@ -40,16 +41,28 @@ function FpsGuard({ onDegrade, onFail }: FpsGuardProps) {
 const DRAG_TURN = 0.008;
 /** Share of the spin kept after one 60 fps frame once the pointer lets go. */
 const SPIN_KEEP = 0.94;
+/** A press that moves less than this (CSS pixels) and is let go within this time is a click. */
+const CLICK_SLOP_PX = 5;
+const CLICK_MS = 450;
 
 /**
  * Drag across the scene to spin it (the sphere and the network together); let go and it
- * keeps turning for a moment, then settles. A pointer aid on a decorative picture: the
- * page reads the same without it. Vertical swipes still scroll the page on touch screens.
+ * keeps turning for a moment, then settles. A click sends a burst of orders out of the
+ * core. Pointer aids on a decorative picture: the page reads the same without them.
+ * Vertical swipes still scroll the page on touch screens.
  */
-function DragSpin({ children }: { children: ReactNode }) {
+function DragSpin({ bus, children }: { bus: SceneBus; children: ReactNode }) {
   const groupRef = useRef<Group>(null);
   const canvas = useThree((state) => state.gl.domElement);
-  const drag = useRef({ pointer: null as number | null, lastX: 0, yaw: 0, speed: 0 });
+  const drag = useRef({
+    pointer: null as number | null,
+    lastX: 0,
+    downX: 0,
+    downY: 0,
+    downAt: 0,
+    yaw: 0,
+    speed: 0,
+  });
 
   useEffect(() => {
     const state = drag.current;
@@ -57,6 +70,9 @@ function DragSpin({ children }: { children: ReactNode }) {
       if (event.button !== 0 || state.pointer !== null) return;
       state.pointer = event.pointerId;
       state.lastX = event.clientX;
+      state.downX = event.clientX;
+      state.downY = event.clientY;
+      state.downAt = event.timeStamp;
       state.speed = 0;
       canvas.setPointerCapture(event.pointerId);
     };
@@ -70,6 +86,10 @@ function DragSpin({ children }: { children: ReactNode }) {
     const onUp = (event: PointerEvent) => {
       if (event.pointerId !== state.pointer) return;
       state.pointer = null;
+      const still =
+        Math.hypot(event.clientX - state.downX, event.clientY - state.downY) < CLICK_SLOP_PX &&
+        event.timeStamp - state.downAt < CLICK_MS;
+      if (event.type === 'pointerup' && still) bus.requestBurst();
     };
     canvas.addEventListener('pointerdown', onDown);
     canvas.addEventListener('pointermove', onMove);
@@ -81,7 +101,7 @@ function DragSpin({ children }: { children: ReactNode }) {
       canvas.removeEventListener('pointerup', onUp);
       canvas.removeEventListener('pointercancel', onUp);
     };
-  }, [canvas]);
+  }, [bus, canvas]);
 
   useFrame((_, delta) => {
     const group = groupRef.current;
@@ -102,6 +122,7 @@ function DragSpin({ children }: { children: ReactNode }) {
 /** Lazy-loaded WebGL scene. Default export so React.lazy can split it (with three.js) into its own chunk. */
 export default function Scene3D({ active, onReady, onFail }: Scene3DProps) {
   const [maxDpr, setMaxDpr] = useState(MAX_DPR);
+  const [bus] = useState(createSceneBus);
 
   useEffect(() => () => onReady(false), [onReady]);
 
@@ -133,11 +154,11 @@ export default function Scene3D({ active, onReady, onFail }: Scene3DProps) {
       onCreated={onCreated}
     >
       {/* The liquid core, with the network of nodes and travelling orders around it. */}
-      <DragSpin>
+      <DragSpin bus={bus}>
         <group scale={0.72}>
-          <FluidSphere />
+          <FluidSphere bus={bus} />
         </group>
-        <OrderNetwork />
+        <OrderNetwork bus={bus} />
       </DragSpin>
       <FpsGuard onDegrade={() => setMaxDpr(1)} onFail={onFail} />
     </Canvas>

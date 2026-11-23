@@ -23,6 +23,8 @@ public/site.webmanifest
 # the CV with a phone number, and the number itself (pnpm cv:private)
 private
 .vercel
+# the desktop app's preview settings (one per machine)
+.claude/launch.json
 # working notes kept on this machine only
 .ai
 HANDOFF.md

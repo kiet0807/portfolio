@@ -6,6 +6,7 @@ public/*.png
 public/*.ico
 .lighthouse
 .impeccable
+.claude/launch.json
 .ai
 HANDOFF.md
 PLAN.md

@@ -260,7 +260,7 @@ Các trường hợp còn lại, và khi WebGL lỗi hoặc chạy quá chậm, 
 
 Hình 3D vẽ lại câu tagline: lõi chất lỏng ở giữa, bao quanh là một lớp vỏ gồm các nút (kênh bán và kho), và những "đơn hàng" chạy theo các cung nối giữa các nút lớn. Số nút, số tuyến và tốc độ chỉnh ở đầu [`src/components/hero/OrderNetwork.tsx`](src/components/hero/OrderNetwork.tsx). Mạng lưới được dựng cố định (không ngẫu nhiên) nên lần nào vào trang cũng giống nhau.
 
-Viền khối cầu đổi sắc giữa xanh ngọc và tím theo góc nhìn (như màng xà phòng), cộng một dải phản chiếu sáng phía trên cho cảm giác kính; cả hai tính trong shader, không thêm lượt vẽ. Kéo chuột ngang trên khối cầu để xoay cả khối cầu và mạng lưới; buông tay thì nó quay chậm dần rồi dừng (`DragSpin` trong [`Scene3D.tsx`](src/components/hero/Scene3D.tsx)). Trên màn cảm ứng, vuốt dọc vẫn cuộn trang.
+Mỗi đơn hàng là một chấm sáng kéo đuôi. Đơn tới một nút lớn thì nút đó lóe lên, và trên lõi một vòng sáng mờ lan ra từ phía nút đó (tối đa khoảng một vòng mỗi giây). Bấm vào khối cầu thì một loạt đơn bay từ mặt trước của lõi tỏa ra mọi nút lớn. Kéo chuột ngang để xoay cả khối cầu và mạng lưới; buông tay thì nó quay chậm dần rồi dừng. Trên màn cảm ứng, vuốt dọc vẫn cuộn trang. Các phần của cảnh báo cho nhau qua [`sceneBus.ts`](src/components/hero/sceneBus.ts): mạng lưới báo chỗ đơn tới, lõi gợn sóng từ đó; `DragSpin` trong [`Scene3D.tsx`](src/components/hero/Scene3D.tsx) báo cú bấm.
 
 ## Deploy lên Vercel
 
@@ -318,7 +318,7 @@ Vercel tự phục vụ `dist/404.html` với mã trạng thái 404 cho mọi đ
 | Hạng mục                                           | Kết quả                                                                                                                                                |
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `pnpm typecheck`, `pnpm lint`, `pnpm format:check` | Đạt, 0 lỗi, 0 warning                                                                                                                                  |
-| `pnpm test`                                        | 175/175 test đạt                                                                                                                                       |
+| `pnpm test`                                        | 177/177 test đạt                                                                                                                                       |
 | `pnpm build`                                       | Đạt, không warning                                                                                                                                     |
 | JS tải ban đầu                                     | 141.0 KB gzip (ngân sách 150 KB). Tải lười: chunk 3D 232.4 KB, bảng chat 3.5 KB, bảng lệnh 3.0 KB, mỗi bài viết 3.4 đến 6.5 KB, bộ đọc Markdown 1.4 KB |
 | `pnpm qa`                                          | 86/86 kiểm tra đạt, ở 7 độ rộng từ 320px đến 2560px. Phần AI của chatbot chạy với một máy chủ giả lập Gemini                                           |

@@ -1,38 +1,46 @@
 import { useFrame } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
-import { Color, Vector2, type IUniform, type Mesh, type ShaderMaterial } from 'three';
-import { fragmentShader, vertexShader } from './shaders';
+import { Color, Vector2, Vector3, Vector4, type IUniform, type Mesh, type ShaderMaterial } from 'three';
+import type { SceneBus } from './sceneBus';
+import { fragmentShader, PULSE_SLOTS, vertexShader } from './shaders';
 
 // A type alias (not an interface) so it is assignable to three's `{ [name: string]: IUniform }`.
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type SphereUniforms = {
   uTime: IUniform<number>;
   uPointer: IUniform<Vector2>;
+  uPulses: IUniform<Vector4[]>;
   uDeep: IUniform<Color>;
   uMid: IUniform<Color>;
   uLight: IUniform<Color>;
-  uAccent: IUniform<Color>;
 };
+
+/** Ordinary arrivals ripple the core at most this often; a click always does. */
+const RIPPLE_GAP_S = 0.9;
 
 function createUniforms(): SphereUniforms {
   return {
     uTime: { value: 0 },
     uPointer: { value: new Vector2(0, 0) },
+    uPulses: { value: Array.from({ length: PULSE_SLOTS }, () => new Vector4(0, 0, 0, -100)) },
     // Water palette: navy → primary blue → cyan.
     uDeep: { value: new Color('#0b1f3a') },
     uMid: { value: new Color('#2563eb') },
     uLight: { value: new Color('#22d3ee') },
-    // The site's AI violet, for the thin-film sheen at the rim.
-    uAccent: { value: new Color('#a78bfa') },
   };
 }
 
-/** Liquid-looking sphere: noise-displaced, slowly turning, leaning toward the pointer. */
-export function FluidSphere() {
+/**
+ * Liquid-looking sphere: noise-displaced, slowly turning, leaning toward the pointer.
+ * Where the network reports an arriving order, a faint ring of light travels over it.
+ */
+export function FluidSphere({ bus }: { bus: SceneBus }) {
   const meshRef = useRef<Mesh>(null);
   const materialRef = useRef<ShaderMaterial>(null);
   const target = useRef({ x: 0, y: 0 });
   const eased = useRef({ x: 0, y: 0 });
+  const lastRipple = useRef(-100);
+  const local = useRef(new Vector3());
 
   const uniforms = useMemo(() => createUniforms(), []);
 
@@ -56,10 +64,27 @@ export function FluidSphere() {
     eased.current.x += (target.current.x - eased.current.x) * k;
     eased.current.y += (target.current.y - eased.current.y) * k;
 
-    live.uTime.value += dt;
+    const now = live.uTime.value + dt;
+    live.uTime.value = now;
     live.uPointer.value.set(eased.current.x, eased.current.y);
     mesh.rotation.x = -eased.current.y * 0.22;
     mesh.rotation.y = eased.current.x * 0.3;
+
+    // Arrivals become ripples, from the point of the core nearest to where the order landed.
+    const pulses = live.uPulses.value;
+    for (const arrival of bus.takeArrivals()) {
+      const strong = arrival.strength >= 1;
+      if (!strong && now - lastRipple.current < RIPPLE_GAP_S) continue;
+      lastRipple.current = now;
+      const slot = pulses.reduce((oldest, pulse) => (pulse.w < oldest.w ? pulse : oldest));
+      const direction = mesh.worldToLocal(local.current.copy(arrival.point)).normalize();
+      slot.set(
+        direction.x * arrival.strength,
+        direction.y * arrival.strength,
+        direction.z * arrival.strength,
+        now,
+      );
+    }
   });
 
   return (
