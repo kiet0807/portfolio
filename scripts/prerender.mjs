@@ -161,7 +161,7 @@ ${LANGS.map((lang) => `    <link rel="alternate" hreflang="${lang}" href="${site
     { path: (lang) => `/${lang}` },
     ...ARTICLES.map((article) => ({
       path: (lang) => articlePath(lang, article.slug),
-      lastmod: article.date,
+      lastmod: article.updated ?? article.date,
     })),
   ];
   const urls = pages

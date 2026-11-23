@@ -4,6 +4,8 @@ Bài toán khó hơn ở chỗ repository không phục vụ một agent mà b�
 
 Bài này kể lại cách tôi giải bài toán đó trên frontend của Onflow OMS, sau sáu tháng vận hành, kèm cấu trúc thư mục và các đoạn cấu hình để bạn có thể dựng lại cho repository của mình. Các công cụ này thay đổi rất nhanh; mọi hành vi mô tả dưới đây đúng tại thời điểm viết, tháng 11/2026.
 
+> **Cập nhật 23/11/2026.** Copilot giờ đọc thẳng `AGENTS.md`, và ở một số nơi (coding agent, CLI, code review) đọc cả `CLAUDE.md`; con trỏ trong `.github/` vì thế thành lớp dự phòng, còn các file `applyTo:` vẫn có việc riêng. Gemini CLI đã ngừng phục vụ tài khoản cá nhân từ 18/6/2026, khi Google chuyển sang Antigravity CLI; nó vẫn chạy với khóa API trả phí hoặc gói doanh nghiệp.
+
 ## Toàn cảnh
 
 Trước khi đi vào từng phần, đây là toàn bộ bộ cấu hình, rút gọn:
@@ -51,7 +53,7 @@ Every rule lives in AGENTS.md, imported above. A new rule goes there,
 never here: this is the one file the other agents cannot see.
 ```
 
-`CLAUDE.md` được giữ ngắn có chủ ý. Nó được nạp vào mọi phiên làm việc, dù có liên quan hay không, và nó là nơi duy nhất ba agent còn lại không nhìn thấy. Một quy tắc viết ở đó là một quy tắc chỉ một nửa team agent biết.
+`CLAUDE.md` được giữ ngắn có chủ ý. Nó được nạp vào mọi phiên làm việc, dù có liên quan hay không, và không phải agent nào cũng đọc nó: Codex và Gemini CLI thì không, Copilot thì tùy nơi. Một quy tắc viết ở đó là một quy tắc chỉ một phần team agent biết.
 
 Năm file quy tắc của Copilot phủ năm mảng hay gặp nhất: data layer, form, test, TypeScript và UI. Mỗi file khai báo `applyTo:` để Copilot chỉ áp quy tắc cho đúng nhóm đường dẫn.
 
@@ -70,7 +72,7 @@ ln -s ../.agents/commands .claude/commands
 
 Sao chép skill cho từng agent chính là cách nhanh nhất để bốn bản trôi xa nhau.
 
-## Ba subagent, ba vai, ba mức chi phí
+## Ba subagent, ba vai, model theo việc
 
 Claude Code cho phép tách việc cho subagent, mỗi subagent có context riêng, công cụ riêng và model riêng. Tôi dùng ba, và không subagent nào được sửa code:
 

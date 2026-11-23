@@ -20,6 +20,12 @@ describe('renderHead', () => {
     expect(head).toContain('application/ld+json');
   });
 
+  it.each(ARTICLES)('says when $slug was published and last changed', (article) => {
+    const head = renderHead({ kind: 'article', lang: 'en', slug: article.slug });
+    expect(head).toContain(`"datePublished":"${article.date}"`);
+    expect(head).toContain(`"dateModified":"${article.updated ?? article.date}"`);
+  });
+
   it.each(['en', 'vi'] as const)('describes an article as an article on /%s/writing/…', (lang) => {
     const [article] = ARTICLES;
     if (!article) return;

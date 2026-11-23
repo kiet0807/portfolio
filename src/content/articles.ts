@@ -15,6 +15,8 @@ export interface ArticleMeta {
   readonly slug: string;
   /** Publication date, "YYYY-MM-DD". */
   readonly date: string;
+  /** Last change to what the article says, "YYYY-MM-DD". Leave out when there was none. */
+  readonly updated?: string;
   readonly title: Localized;
   /** One or two sentences: the lead under the title, the search snippet and the link preview. */
   readonly summary: Localized;
@@ -46,6 +48,7 @@ export const ARTICLES: readonly ArticleMeta[] = [
   {
     slug: 'ai-agent-setup',
     date: '2026-11-12',
+    updated: '2026-11-23',
     title: {
       en: 'Write the rules once, and four AI agents follow them',
       vi: 'Viết quy tắc một lần, bốn AI agent cùng làm theo',

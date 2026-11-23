@@ -114,7 +114,7 @@ function articleJsonLd(article: ArticleMeta, lang: Lang): string {
     description: article.summary[lang],
     inLanguage: lang,
     datePublished: article.date,
-    dateModified: article.date,
+    dateModified: article.updated ?? article.date,
     keywords: article.tags.join(', '),
     url,
     mainEntityOfPage: url,
@@ -186,7 +186,7 @@ export function renderHead(route: Route): string {
   );
 
   // Above-the-fold fonts: body text and the thin display heading with its Vietnamese glyphs.
-  // The home page also shows the serif accent of the name in the hero ("Trần" on /en too).
+  // The home page also shows the serif accent of the name in the hero ("Kiệt", on /en too).
   lines.push(
     fontPreload('inter-latin-400-normal'),
     fontPreload('space-grotesk-latin-300-normal'),

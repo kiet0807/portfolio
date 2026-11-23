@@ -4,6 +4,8 @@ The harder part is that this repository does not serve one agent but four: Claud
 
 This post walks through how I solved that on the Onflow OMS frontend after six months of running it, with the folder layout and configuration excerpts you need to rebuild it in your own repository. These tools change quickly; everything described here is accurate as of November 2026.
 
+> **Update, November 23, 2026.** Copilot now reads `AGENTS.md` directly, and in some places (the coding agent, the CLI, code review) `CLAUDE.md` as well; the pointer in `.github/` is therefore a fallback, while the `applyTo:` files still do a job of their own. Gemini CLI stopped serving personal accounts on June 18, 2026, when Google moved to Antigravity CLI; it still runs with a paid API key or an enterprise plan.
+
 ## The whole picture
 
 Before going through the parts, here is the entire setup, condensed:
@@ -51,7 +53,7 @@ Every rule lives in AGENTS.md, imported above. A new rule goes there,
 never here: this is the one file the other agents cannot see.
 ```
 
-`CLAUDE.md` is kept short on purpose. It is loaded into every session, relevant or not, and it is the one file the other three agents never see. A rule written there is a rule only part of the team of agents knows.
+`CLAUDE.md` is kept short on purpose. It is loaded into every session, relevant or not, and not every agent reads it: Codex and Gemini CLI do not, and Copilot only in some places. A rule written there is a rule only part of the team of agents knows.
 
 Copilot's five rule files cover the areas that come up most: the data layer, forms, tests, TypeScript and UI. Each declares `applyTo:`, so Copilot applies it only to the matching paths.
 
@@ -70,7 +72,7 @@ ln -s ../.agents/commands .claude/commands
 
 Copying a skill per agent is the fastest way to let four versions drift apart.
 
-## Three subagents, three roles, three price points
+## Three subagents, three roles, a model for each job
 
 Claude Code can hand work to subagents, each with its own context, its own tools and its own model. I use three, and none of them is allowed to edit code:
 

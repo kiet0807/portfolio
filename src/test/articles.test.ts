@@ -11,6 +11,8 @@ describe('articles', () => {
       expect(article.slug).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
       expect(article.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
       expect(Number.isNaN(Date.parse(article.date)), article.slug).toBe(false);
+      // An update comes after the publication, never before it.
+      if (article.updated) expect(article.updated > article.date, article.slug).toBe(true);
       expect(article.tags.length).toBeGreaterThan(0);
     }
     const dates = ARTICLES.map((article) => article.date);
