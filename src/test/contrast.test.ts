@@ -42,6 +42,10 @@ describe.each(Object.entries(themes))('%s theme contrast (WCAG AA)', (_name, sou
   it.each(backgrounds)('links on --%s', (bg) => {
     expect(contrastRatio(token(source, 'link'), token(source, bg))).toBeGreaterThanOrEqual(AA_TEXT);
   });
+  // The AI accent writes small labels (Kai's role, the AI project card, the AI workflow section).
+  it.each(backgrounds)('AI accent text on --%s', (bg) => {
+    expect(contrastRatio(token(source, 'ai'), token(source, bg))).toBeGreaterThanOrEqual(AA_TEXT);
+  });
   it('focus ring against the page background', () => {
     expect(contrastRatio(token(source, 'link'), token(source, 'bg'))).toBeGreaterThanOrEqual(AA_UI);
   });

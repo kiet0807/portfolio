@@ -751,6 +751,20 @@
     animation: bot-panel-out 0.14s ease-in forwards;
   }
 }
+/* Kai's row of questions (AssistantPanel): a soft fade at each edge, and where an arrow     */
+/* button sits over the row, the text is gone before it reaches the button, so no question  */
+/* looks cut by it.                                                                         */
+.bot-topics {
+  --fade-left: transparent, #000 1rem;
+  --fade-right: #000 calc(100% - 1rem), transparent;
+  mask-image: linear-gradient(to right, var(--fade-left), var(--fade-right));
+}
+.bot-topics[data-more-left] {
+  --fade-left: transparent 2.5rem, #000 4.5rem;
+}
+.bot-topics[data-more-right] {
+  --fade-right: #000 calc(100% - 4.5rem), transparent calc(100% - 2.5rem);
+}
 @keyframes bot-panel-in {
   from {
     opacity: 0;

@@ -64,7 +64,7 @@ function ProjectCard({ project }: { project: Project }) {
           {project.metrics.map((metric) => (
             <div
               key={metric.value}
-              className="flex flex-col-reverse justify-end px-3 py-2.5 lg:px-2 xl:px-3 print:p-0"
+              className="flex flex-col-reverse justify-end px-1.5 py-2.5 min-[360px]:px-3 lg:px-2 xl:px-3 print:p-0"
             >
               <dt className="mt-0.5 text-xs text-pretty text-muted">{metric.label[lang]}</dt>
               <dd className="font-mono text-base font-bold whitespace-nowrap text-fg tabular-nums">

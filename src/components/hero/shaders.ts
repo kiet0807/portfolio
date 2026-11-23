@@ -105,6 +105,7 @@ export const fragmentShader = /* glsl */ `
 uniform vec3 uDeep;
 uniform vec3 uMid;
 uniform vec3 uLight;
+uniform vec3 uAccent;
 varying vec3 vNormal;
 varying vec3 vViewPosition;
 varying float vWave;
@@ -122,8 +123,16 @@ void main() {
 
   float crest = smoothstep(-0.2, 0.26, vWave);
   vec3 base = mix(uDeep, uMid, clamp(crest * 0.5 + diffuse * 0.62, 0.0, 1.0));
-  vec3 color = mix(base, uLight, fresnel * 0.9);
+  // Thin-film rim: the edge drifts between cyan and violet with the viewing angle and the
+  // waves, like light on a soap bubble; the face keeps the water palette.
+  float film = 0.5 + 0.5 * sin((fresnel * 1.6 + vWave * 1.2) * 3.0 + 1.2);
+  vec3 rim = mix(uLight, uAccent, film * 0.7);
+  vec3 color = mix(base, rim, fresnel * 0.9);
   color += vec3(1.0) * spec * 0.7 + uLight * spec2 * 0.22;
+  // A studio window above: a soft band in the reflection, sharper near its middle, for a glassy look.
+  vec3 R = reflect(-V, N);
+  float sky = smoothstep(0.3, 0.85, R.y);
+  color += uLight * sky * 0.1 + vec3(1.0) * pow(sky, 6.0) * 0.16;
 
   gl_FragColor = vec4(color, 1.0);
   #include <tonemapping_fragment>

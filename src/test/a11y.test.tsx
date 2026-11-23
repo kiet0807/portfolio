@@ -1,7 +1,7 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import axe from 'axe-core';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { App } from '@/App';
 import { ARTICLES, loadArticle } from '@/content/articles';
 import { t } from '@/i18n/dictionary';
@@ -45,5 +45,26 @@ describe('accessibility (axe-core)', () => {
       rules: { 'color-contrast': { enabled: false } },
     });
     expect(results.violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
+  });
+
+  describe('with Kai open', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it('has no violations, question chips and the AI input included', async () => {
+      // The panel asks /api/chat whether the AI is on; say yes so the input is checked too.
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve({ ai: true }) })),
+      );
+      const user = userEvent.setup();
+      render(<App route={{ kind: 'page', lang: 'vi' }} />);
+      await user.click(screen.getByRole('button', { name: t('vi', 'bot.open') }));
+      const panel = await screen.findByRole('group', { name: t('vi', 'bot.name') });
+      await within(panel).findByRole('textbox');
+      const results = await axe.run(panel, { rules: { 'color-contrast': { enabled: false } } });
+      expect(results.violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
+    });
   });
 });

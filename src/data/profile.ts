@@ -816,7 +816,11 @@ export const profile: Profile = {
         { value: '−53%', label: { en: 'deploy time', vi: 'thời gian deploy' } },
         {
           value: '2.1k',
-          label: { en: 'TypeScript files, no JavaScript', vi: 'file TypeScript, không còn JavaScript' },
+          // 1.6k files were migrated (hero stat); the codebase has grown since. Say both, or the two look at odds.
+          label: {
+            en: 'TS files today (1.6k migrated)',
+            vi: 'file TypeScript hôm nay (1,6k file chuyển)',
+          },
         },
       ],
       tech: ['React', 'TypeScript', 'TanStack Query', 'React Hook Form', 'Vitest'],

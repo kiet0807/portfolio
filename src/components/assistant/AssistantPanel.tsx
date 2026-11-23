@@ -380,7 +380,9 @@ export default function AssistantPanel({ id, onClose, leaving = false, onLeft }:
         <ul
           ref={chipsRef}
           data-bot-topics=""
-          className="-mx-4 flex cursor-grab [scrollbar-width:none] gap-2 overflow-x-auto mask-[linear-gradient(to_right,transparent,#000_1rem,#000_calc(100%-3rem),transparent)] px-4 pr-10 select-none data-dragging:cursor-grabbing"
+          data-more-left={more.left ? '' : undefined}
+          data-more-right={more.right ? '' : undefined}
+          className="bot-topics -mx-4 flex cursor-grab [scrollbar-width:none] gap-2 overflow-x-auto px-4 pr-10 select-none data-dragging:cursor-grabbing"
         >
           {TOPICS.map((topic, i) => (
             <li key={topic.id} className="shrink-0">

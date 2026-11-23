@@ -62,9 +62,10 @@ const STAT_COUNT = (/\n {2}stats: \[([\s\S]*?)\n {2}\],/.exec(profileSource)?.[1
   .length;
 const TRENDS = (/\n {2}stats: \[([\s\S]*?)\n {2}\],/.exec(profileSource)?.[1].match(/\n {6}trend: \[/g) ?? [])
   .length;
-// The four required breakpoints, plus 1024 (where the desktop navigation is at its tightest)
-// and 2560 (where the root font size has grown to 125%).
-const WIDTHS = [360, 768, 1024, 1280, 1920, 2560];
+// The four required breakpoints, plus 320 (the narrowest phones still in use, where long
+// English labels wrap first), 1024 (where the desktop navigation is at its tightest) and
+// 2560 (where the root font size has grown to 125%).
+const WIDTHS = [320, 360, 768, 1024, 1280, 1920, 2560];
 const FOCUS_EN = [.../focus: \{\s*en: \[([^\]]+)\]/.exec(profileSource)[1].matchAll(/'([^']+)'/g)].map(
   (m) => m[1],
 );

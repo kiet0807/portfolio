@@ -20,7 +20,7 @@ pnpm dev          # http://localhost:5173 (tự chuyển sang /en hoặc /vi)
 | `pnpm preview`    | Xem bản build tại http://127.0.0.1:4173, mô phỏng Vercel (clean URL, trang 404 thật)                  |
 | `pnpm check`      | typecheck + lint + format + test + build. Chạy trước khi deploy                                       |
 | `pnpm qa`         | Kiểm tra trên Chrome thật: responsive, bàn phím, đổi ngôn ngữ, 3D và fallback. Cần `pnpm build` trước |
-| `pnpm lighthouse` | Đo Lighthouse mobile cho `/en`, `/vi` và bốn trang bài viết. Cần `pnpm build` trước                   |
+| `pnpm lighthouse` | Đo Lighthouse mobile cho `/en`, `/vi` và mọi trang bài viết. Cần `pnpm build` trước                   |
 | `pnpm cv`         | Sinh `cv-en.pdf` và `cv-vi.pdf` (bố cục CV riêng, 2 trang A4) từ `profile.ts`                         |
 | `pnpm cv:private` | Bản CV có số điện thoại (đọc từ `private/contact.json`), ghi vào `private/`, không lên trang          |
 | `pnpm assets`     | Chỉ sinh lại ảnh OG, icon, font                                                                       |
@@ -143,11 +143,11 @@ avatar: { src: '/avatar.webp', width: 512, height: 512 },
 
 ### Ảnh Open Graph (ảnh xem trước khi chia sẻ link)
 
-`public/og-en.png` và `public/og-vi.png` được **sinh tự động** từ `profile.ts` (tên, vị trí, tagline, nhãn `seo.ogLabel`) mỗi lần chạy `pnpm dev` hoặc `pnpm build`. Bạn không cần sửa tay.
+`public/og-en.png` và `public/og-vi.png` được **sinh tự động** từ `profile.ts` (tên, vị trí, tagline, nhãn `seo.ogLabel`) mỗi lần chạy `pnpm dev` hoặc `pnpm build`. Bạn không cần sửa tay. Như ở hero và đầu CV, tên gọi (`givenName`) được viết bằng Playfair Display nghiêng với màu chuyển.
 
 Mỗi bài viết có ảnh riêng cho từng ngôn ngữ, `public/og/<slug>-<lang>.png`, mang tiêu đề bài, thời gian đọc và tên tác giả; trang bài dùng ảnh này thay cho ảnh chung. Ảnh được sinh từ `src/content/articles.ts` cùng lúc, cỡ chữ tiêu đề tự chọn theo độ dài. Tiêu đề quá dài (không vừa ba dòng ở cỡ nhỏ nhất) thì script báo lỗi và yêu cầu rút gọn.
 
-- Muốn đổi bố cục hoặc màu: sửa hàm `ogFrame` (nền chung), `ogTree` (trang chủ) hoặc `articleOgTree` (bài viết) trong [`scripts/generate-assets.mjs`](scripts/generate-assets.mjs), chạy `pnpm assets`, rồi mở file PNG để xem.
+- Muốn đổi bố cục hoặc màu: sửa hàm `ogFrame` (nền chung), `ogTree` (trang chủ) hoặc `articleOgTree` (bài viết) trong [`scripts/generate-assets.mjs`](scripts/generate-assets.mjs), chạy `pnpm assets`, rồi mở file PNG để xem. Đổi giao diện ảnh thì tăng `OG_DESIGN` trong [`src/seo/head.ts`](src/seo/head.ts): đường dẫn ảnh đổi theo, nên LinkedIn tải ảnh mới thay vì giữ ảnh cũ.
 - Sau khi deploy, Facebook, LinkedIn và Zalo lưu cache ảnh cũ khá lâu. Dùng [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) hoặc [LinkedIn Post Inspector](https://www.linkedin.com/post-inspector/) để buộc tải lại.
 
 ### Favicon
@@ -260,6 +260,8 @@ Các trường hợp còn lại, và khi WebGL lỗi hoặc chạy quá chậm, 
 
 Hình 3D vẽ lại câu tagline: lõi chất lỏng ở giữa, bao quanh là một lớp vỏ gồm các nút (kênh bán và kho), và những "đơn hàng" chạy theo các cung nối giữa các nút lớn. Số nút, số tuyến và tốc độ chỉnh ở đầu [`src/components/hero/OrderNetwork.tsx`](src/components/hero/OrderNetwork.tsx). Mạng lưới được dựng cố định (không ngẫu nhiên) nên lần nào vào trang cũng giống nhau.
 
+Viền khối cầu đổi sắc giữa xanh ngọc và tím theo góc nhìn (như màng xà phòng), cộng một dải phản chiếu sáng phía trên cho cảm giác kính; cả hai tính trong shader, không thêm lượt vẽ. Kéo chuột ngang trên khối cầu để xoay cả khối cầu và mạng lưới; buông tay thì nó quay chậm dần rồi dừng (`DragSpin` trong [`Scene3D.tsx`](src/components/hero/Scene3D.tsx)). Trên màn cảm ứng, vuốt dọc vẫn cuộn trang.
+
 ## Deploy lên Vercel
 
 1. Đưa thư mục này lên một repository Git (GitHub, GitLab hoặc Bitbucket).
@@ -316,13 +318,13 @@ Vercel tự phục vụ `dist/404.html` với mã trạng thái 404 cho mọi đ
 | Hạng mục                                           | Kết quả                                                                                                                                                |
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `pnpm typecheck`, `pnpm lint`, `pnpm format:check` | Đạt, 0 lỗi, 0 warning                                                                                                                                  |
-| `pnpm test`                                        | 168/168 test đạt                                                                                                                                       |
+| `pnpm test`                                        | 175/175 test đạt                                                                                                                                       |
 | `pnpm build`                                       | Đạt, không warning                                                                                                                                     |
 | JS tải ban đầu                                     | 141.0 KB gzip (ngân sách 150 KB). Tải lười: chunk 3D 232.4 KB, bảng chat 3.5 KB, bảng lệnh 3.0 KB, mỗi bài viết 3.4 đến 6.5 KB, bộ đọc Markdown 1.4 KB |
-| `pnpm qa`                                          | 82/82 kiểm tra đạt, ở 6 độ rộng từ 360px đến 2560px. Phần AI của chatbot chạy với một máy chủ giả lập Gemini                                           |
+| `pnpm qa`                                          | 86/86 kiểm tra đạt, ở 7 độ rộng từ 320px đến 2560px. Phần AI của chatbot chạy với một máy chủ giả lập Gemini                                           |
 | Lighthouse mobile `/en`                            | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                     |
 | Lighthouse mobile `/vi`                            | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                     |
-| Lighthouse mobile 4 trang bài viết (`/en`, `/vi`)  | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                     |
+| Lighthouse mobile 6 trang bài viết (`/en`, `/vi`)  | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                     |
 | In trang (Ctrl/Cmd + P)                            | 4 trang A4 mỗi ngôn ngữ, nền sáng, không còn phần nào bị ẩn                                                                                            |
 | `pnpm cv`                                          | 2 trang A4 mỗi ngôn ngữ, cỡ chữ 8pt (Anh) và 8.1pt (Việt)                                                                                              |
 | Chế độ tương phản cao (giả lập)                    | Nút có viền, mục đang chọn phân biệt được                                                                                                              |

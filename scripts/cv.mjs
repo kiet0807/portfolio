@@ -62,17 +62,52 @@ const siteUrl = (process.env.SITE_URL || profile.siteUrl).replace(/\/+$/, '');
 
 const pageCount = (pdf) => pdf.toString('latin1').match(/\/Type\s*\/Page[^s]/g)?.length ?? 0;
 
+/** Width of the avatar in the CV, in pixels: printed 24 mm wide, this is about 340 dpi. */
+const AVATAR_PX = 320;
+
+/**
+ * The site's avatar is WebP, which Chrome's PDF writer can only store as raw pixels
+ * (over 200 KB for 512×512). A JPEG goes into the PDF as it is, so the CV gets a small
+ * JPEG made from the same picture. Drawn from a data URL, so the canvas is not tainted.
+ */
+async function cvAvatar(browser) {
+  const file = fromRoot('public', profile.avatar.src.replace(/^\//, ''));
+  const source = `data:image/webp;base64,${readFileSync(file).toString('base64')}`;
+  const page = await browser.newPage();
+  try {
+    return await page.evaluate(
+      async (src, size) => {
+        const image = new Image();
+        image.src = src;
+        await image.decode();
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const context = canvas.getContext('2d');
+        context.imageSmoothingQuality = 'high';
+        context.drawImage(image, 0, 0, size, size);
+        return canvas.toDataURL('image/jpeg', 0.9);
+      },
+      source,
+      AVATAR_PX,
+    );
+  } finally {
+    await page.close();
+  }
+}
+
 await mkdir(WORK_DIR, { recursive: true });
 const browser = await puppeteer.launch({ executablePath: CHROME });
 let failed = false;
 try {
+  const avatarUrl = await cvAvatar(browser);
   for (const lang of ['en', 'vi']) {
     const html = renderCv({
       profile,
       lang,
       t: (key) => t(lang, key),
       fontUrl: (file) => pathToFileURL(fromRoot('public/fonts', file)).href,
-      avatarUrl: pathToFileURL(fromRoot('public', profile.avatar.src.replace(/^\//, ''))).href,
+      avatarUrl,
       phone,
       // The placeholder domain is not an address anyone should be sent to.
       siteUrl: siteUrl.includes('example.com') ? null : `${siteUrl}/${lang}`,

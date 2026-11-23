@@ -1,5 +1,5 @@
 /**
- * Lighthouse (mobile, simulated throttling) for /en and /vi against the production
+ * Lighthouse (mobile, simulated throttling) for /en, /vi and every article page against the production
  * build, served the way Vercel serves it. Each page is measured several times and
  * the median score per category is reported, because single runs vary.
  *
@@ -17,14 +17,15 @@ import { startServer } from './serve.mjs';
 
 const LIGHTHOUSE_VERSION = '13.6.0';
 const RUNS = Number(process.env.LH_RUNS ?? 3);
-// The two home pages, and four article pages: both languages of one article, one of each other.
+// The two home pages and every article in both languages (from the article registry).
+const ARTICLE_SLUGS = [
+  ...(await readFile(fromRoot('src/content/articles.ts'), 'utf8')).matchAll(/^\s{4}slug: '([a-z0-9-]+)',$/gm),
+].map((match) => match[1]);
+if (ARTICLE_SLUGS.length === 0) throw new Error('No article slugs found in src/content/articles.ts');
 const PAGES = [
   '/en',
   '/vi',
-  '/vi/writing/typescript-migration',
-  '/en/writing/ai-agent-setup',
-  '/vi/writing/taiga-mcp',
-  '/en/writing/taiga-mcp',
+  ...ARTICLE_SLUGS.flatMap((slug) => [`/en/writing/${slug}`, `/vi/writing/${slug}`]),
 ];
 const THRESHOLDS = { performance: 90, accessibility: 95, 'best-practices': 95, seo: 95 };
 const CATEGORIES = Object.keys(THRESHOLDS);

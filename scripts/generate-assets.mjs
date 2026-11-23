@@ -202,19 +202,44 @@ const ogPill = (label) =>
   );
 
 function ogTree(profile, lang) {
+  // The given name in the serif italic with the light gradient, as in the hero heading and the CV.
+  const at = profile.name.indexOf(profile.givenName);
+  const name =
+    at < 0
+      ? profile.name
+      : [
+          profile.name.slice(0, at).trim(),
+          h(
+            'span',
+            {
+              fontFamily: 'Accent Latin, Accent Vietnamese',
+              fontStyle: 'italic',
+              fontWeight: 400,
+              // Italic glyphs lean past their box: room so the clip keeps the overhang.
+              padding: '0 0.12em 0.08em 0',
+              backgroundImage: 'linear-gradient(100deg, #60A5FA 0%, #22D3EE 55%, #A5F3FC 100%)',
+              backgroundClip: 'text',
+              color: 'transparent',
+            },
+            profile.givenName,
+          ),
+          profile.name.slice(at + profile.givenName.length).trim(),
+        ].filter(Boolean);
   return ogFrame([
     ogPill(profile.seo.ogLabel[lang]),
     h(
       'div',
       {
         display: 'flex',
+        alignItems: 'baseline',
+        gap: 26,
         marginTop: 44,
         fontSize: 92,
         fontWeight: 700,
         lineHeight: 1.1,
         color: '#FFFFFF',
       },
-      profile.name,
+      name,
     ),
     h(
       'div',
@@ -312,6 +337,15 @@ async function loadOgFonts() {
         style: 'normal',
       });
     }
+  }
+  // The serif italic of the given name on the home image.
+  for (const subset of SUBSETS) {
+    fonts.push({
+      name: subset === 'latin' ? 'Accent Latin' : 'Accent Vietnamese',
+      data: await readFile(`${ACCENT_SRC}/${accentFile(subset).replace(/\.woff2$/, '.woff')}`),
+      weight: 400,
+      style: 'italic',
+    });
   }
   return fonts;
 }

@@ -11,6 +11,7 @@ type SphereUniforms = {
   uDeep: IUniform<Color>;
   uMid: IUniform<Color>;
   uLight: IUniform<Color>;
+  uAccent: IUniform<Color>;
 };
 
 function createUniforms(): SphereUniforms {
@@ -21,6 +22,8 @@ function createUniforms(): SphereUniforms {
     uDeep: { value: new Color('#0b1f3a') },
     uMid: { value: new Color('#2563eb') },
     uLight: { value: new Color('#22d3ee') },
+    // The site's AI violet, for the thin-film sheen at the rim.
+    uAccent: { value: new Color('#a78bfa') },
   };
 }
 

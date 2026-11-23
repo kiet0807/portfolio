@@ -22,7 +22,7 @@ function articleOf(route: Route): ArticleMeta | undefined {
  * its URL for days, even after the page is scraped again, so each image URL carries a version
  * made from what is drawn on it: a new title or job title gets a new URL, and a fresh picture.
  */
-const OG_DESIGN = 1;
+const OG_DESIGN = 2;
 
 /** A short, stable fingerprint of the words drawn on a preview image (FNV-1a, base 36). */
 function ogVersion(parts: readonly (string | number)[]): string {
