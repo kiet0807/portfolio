@@ -24,6 +24,9 @@ describe('renderHead', () => {
     const head = renderHead({ kind: 'article', lang: 'en', slug: article.slug });
     expect(head).toContain(`"datePublished":"${article.date}"`);
     expect(head).toContain(`"dateModified":"${article.updated ?? article.date}"`);
+    const modified = `<meta property="article:modified_time" content="${article.updated ?? ''}" />`;
+    if (article.updated) expect(head).toContain(modified);
+    else expect(head).not.toContain('article:modified_time');
   });
 
   it.each(['en', 'vi'] as const)('describes an article as an article on /%s/writing/…', (lang) => {

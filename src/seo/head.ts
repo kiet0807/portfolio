@@ -173,6 +173,7 @@ export function renderHead(route: Route): string {
   if (article) {
     lines.push(
       `<meta property="article:published_time" content="${article.date}" />`,
+      ...(article.updated ? [`<meta property="article:modified_time" content="${article.updated}" />`] : []),
       `<meta property="article:author" content="${siteUrl}/${lang}" />`,
       ...article.tags.map((tag) => `<meta property="article:tag" content="${esc(tag)}" />`),
     );

@@ -17,7 +17,7 @@ import { startServer } from './serve.mjs';
 
 const LIGHTHOUSE_VERSION = '13.6.0';
 const RUNS = Number(process.env.LH_RUNS ?? 3);
-// The two home pages, and the two articles (one per language).
+// The two home pages, and four article pages: both languages of one article, one of each other.
 const PAGES = [
   '/en',
   '/vi',

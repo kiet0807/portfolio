@@ -280,7 +280,7 @@ SITE_URL=https://ten-mien-cua-ban.com pnpm build
 
 ### Trang 404
 
-Vercel tự phục vụ `dist/404.html` với mã trạng thái 404 cho mọi đường dẫn không tồn tại. Trang hiển thị theo ngôn ngữ đã lưu, nếu chưa có thì theo ngôn ngữ trình duyệt.
+Vercel tự phục vụ `dist/404.html` với mã trạng thái 404 cho mọi đường dẫn không tồn tại. Trang hiển thị theo ngôn ngữ ở đầu đường dẫn (`/en/...` là tiếng Anh, `/vi/...` là tiếng Việt); đường dẫn không có ngôn ngữ thì theo ngôn ngữ đã lưu, nếu chưa có thì theo ngôn ngữ trình duyệt.
 
 ## Cấu trúc thư mục
 

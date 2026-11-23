@@ -113,6 +113,12 @@ export function ArticlePage({ article }: { article: Article }) {
                     <time dateTime={meta.date} className="font-mono text-fg">
                       {formatDate(meta.date, lang)}
                     </time>
+                    {meta.updated ? (
+                      <span className="font-mono text-muted">
+                        ({t('article.updated')}{' '}
+                        <time dateTime={meta.updated}>{formatDate(meta.updated, lang)}</time>)
+                      </span>
+                    ) : null}
                     <span aria-hidden="true" className="text-muted">
                       ·
                     </span>

@@ -400,4 +400,16 @@ describe('articles', () => {
       );
     },
   );
+
+  it.each(['en', 'vi'] as const)('shows in %s when an article was last updated', async (lang) => {
+    const meta = ARTICLES.find((entry) => entry.updated);
+    if (!meta?.updated) return;
+    const article = await loadArticle(meta.slug, lang);
+    const { container } = render(
+      <App route={{ kind: 'article', lang, slug: meta.slug }} article={article} />,
+    );
+    expect(container.querySelector(`time[datetime="${meta.updated}"]`)?.parentElement).toHaveTextContent(
+      t(lang, 'article.updated'),
+    );
+  });
 });

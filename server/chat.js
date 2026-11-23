@@ -25,8 +25,10 @@ export const LIMITS = {
   messages: 10,
   /** Characters per message. */
   chars: 400,
-  /** Bytes of request body. */
+  /** Bytes of request body (UTF-8: a Vietnamese letter can take three). */
   body: 8_000,
+  /** Visitors remembered at once by one running copy of this module. */
+  visitors: 5_000,
   /** Questions per visitor (IP address) per minute and per day. */
   perMinute: 6,
   perDay: 40,
@@ -58,9 +60,14 @@ function allow(ip, now = Date.now()) {
   seen.minuteCount += 1;
   seen.dayCount += 1;
   visitors.set(ip, seen);
-  // Forget old visitors instead of growing for as long as the instance lives.
-  if (visitors.size > 5_000) {
+  // Forget old visitors instead of growing for as long as the instance lives; if that is not
+  // enough (many addresses in one day), forget the earliest seen. A Map keeps insertion order.
+  if (visitors.size > LIMITS.visitors) {
     for (const [key, value] of visitors) if (value.day !== day) visitors.delete(key);
+    for (const key of visitors.keys()) {
+      if (visitors.size <= LIMITS.visitors) break;
+      visitors.delete(key);
+    }
   }
   return true;
 }
@@ -163,10 +170,14 @@ export async function handle(request, env = process.env) {
   if (!sameOrigin(request)) return json(403, { error: 'origin' });
   if (!enabled) return json(503, { error: 'disabled' });
 
+  // Refuse a body announced as too large before reading it; then measure what actually came.
+  if (Number(request.headers.get('content-length') ?? 0) > LIMITS.body)
+    return json(400, { error: 'request' });
   let conversation = null;
   try {
     const raw = await request.text();
-    if (raw.length <= LIMITS.body) conversation = readConversation(JSON.parse(raw));
+    if (new TextEncoder().encode(raw).byteLength <= LIMITS.body)
+      conversation = readConversation(JSON.parse(raw));
   } catch {
     conversation = null;
   }

@@ -5,8 +5,8 @@ import type { Route } from '@/seo/head';
 
 /**
  * Maps a pathname to a route. The real pages are `/en`, `/vi` and one page per article,
- * `/<lang>/writing/<slug>`; everything else is the 404 page, shown in the reader's saved or
- * browser language.
+ * `/<lang>/writing/<slug>`; everything else is the 404 page, in the language at the start of
+ * the path (`/en/…` is English), or else in the reader's saved or browser language.
  */
 export function resolveRoute(input: {
   pathname: string;
@@ -23,6 +23,6 @@ export function resolveRoute(input: {
   }
   return {
     kind: 'notFound',
-    lang: resolveInitialLang({ stored: input.stored, browserLanguages: input.browserLanguages }),
+    lang: resolveInitialLang(input),
   };
 }

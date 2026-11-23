@@ -13,12 +13,18 @@ const DETECT_LANG = `var l='en';try{var s=localStorage.getItem('${STORAGE_KEYS.l
 /** Expression form, used by tests: evaluates to the detected language. */
 export const detectLangExpression = `(function(){${DETECT_LANG}return l})()`;
 
+/** DETECT_LANG, then a language at the start of the path wins: the 404 page of `/en/…` is English. */
+const DETECT_LANG_WITH_PATH = `${DETECT_LANG}var p=location.pathname.split('/').filter(function(x){return x})[0];if(p==='en'||p==='vi'){l=p}`;
+
+/** Expression form of what the 404 page detects, used by tests. */
+export const notFoundLangExpression = `(function(){${DETECT_LANG_WITH_PATH}return l})()`;
+
 /** Root page `/`: go to the right language, keeping query string and hash. */
 export const redirectInlineScript = `(function(){${DETECT_LANG}location.replace('/'+l+location.search+location.hash)})();`;
 
 /**
  * 404 page: a single 404.html has to serve both languages. English is in the
  * markup; other languages sit in <template id="nf-xx">. Before paint this swaps
- * in the reader's language, so React then hydrates matching markup (no flash).
+ * in the language of the path or of the reader, so React then hydrates matching markup (no flash).
  */
-export const notFoundLangInlineScript = `(function(){${DETECT_LANG}if(l==='en')return;var t=document.getElementById('nf-'+l),r=document.getElementById('root');if(!t||!r)return;r.innerHTML=t.innerHTML;document.documentElement.lang=l;var h=t.getAttribute('data-title');if(h)document.title=h})();`;
+export const notFoundLangInlineScript = `(function(){${DETECT_LANG_WITH_PATH}if(l==='en')return;var t=document.getElementById('nf-'+l),r=document.getElementById('root');if(!t||!r)return;r.innerHTML=t.innerHTML;document.documentElement.lang=l;var h=t.getAttribute('data-title');if(h)document.title=h})();`;

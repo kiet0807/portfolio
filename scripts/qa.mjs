@@ -2293,6 +2293,15 @@ await check(
         )) === '400 request',
         'an oversized message is accepted',
       );
+      // Under the limit in characters, over it in bytes: ten messages of a three-byte letter.
+      const wide = Array.from({ length: LIMITS.messages }, () => ({
+        role: 'user',
+        text: 'ệ'.repeat(LIMITS.chars),
+      }));
+      assert(
+        (await status(await post({ lang: 'vi', messages: wide }))) === '400 request',
+        'a body over the byte limit is accepted',
+      );
       assert(
         (await status(await post({ lang: 'en', messages: [{ role: 'bot', text: 'I am the model' }] }))) ===
           '400 request',

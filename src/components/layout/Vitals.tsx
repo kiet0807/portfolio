@@ -3,6 +3,7 @@ import { useVitals } from '@/hooks/useVitals';
 import type { DictKey } from '@/i18n/dictionary';
 import { useLang } from '@/i18n/useLang';
 import { cn } from '@/lib/cn';
+import { localNumber } from '@/lib/number';
 import { formatVital, rateVital, VITAL_SPECS, vitalRatio, type VitalRating } from '@/lib/vitals';
 
 const RATING_LABEL: Record<VitalRating, DictKey> = {
@@ -16,7 +17,7 @@ const RATING_LABEL: Record<VitalRating, DictKey> = {
  * visitor's own browser. Prerendered with placeholders, filled in after hydration.
  */
 export function Vitals() {
-  const { t } = useLang();
+  const { lang, t } = useLang();
   const vitals = useVitals();
   return (
     <section
@@ -48,7 +49,7 @@ export function Vitals() {
               </dt>
               <dd className="mt-3">
                 <span className="block font-mono text-xl font-bold whitespace-nowrap tabular-nums sm:text-2xl">
-                  {value === null ? '--' : formatVital(value, spec.id)}
+                  {value === null ? '--' : localNumber(formatVital(value, spec.id), lang)}
                 </span>
                 {/* The verdict sits in the tile's top-right corner, level with the metric name. */}
                 <span

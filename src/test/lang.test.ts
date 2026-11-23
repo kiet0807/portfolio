@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { detectLangExpression } from '@/i18n/inline-scripts';
+import { afterAll, describe, expect, it } from 'vitest';
+import { detectLangExpression, notFoundLangExpression } from '@/i18n/inline-scripts';
 import { resolveInitialLang } from '@/i18n/lang';
 import { STORAGE_KEYS } from '@/lib/storage';
 import { resolveRoute } from '@/routing';
@@ -38,6 +38,18 @@ describe('resolveRoute', () => {
       lang: 'vi',
     });
   });
+  it('shows the 404 of /en/… in English and of /vi/… in Vietnamese, whatever the reader prefers', () => {
+    expect(resolveRoute({ pathname: '/en/no-such-page', stored: 'vi', browserLanguages: ['vi-VN'] })).toEqual(
+      {
+        kind: 'notFound',
+        lang: 'en',
+      },
+    );
+    expect(resolveRoute({ pathname: '/vi/writing/nope', stored: 'en', browserLanguages: ['en'] })).toEqual({
+      kind: 'notFound',
+      lang: 'vi',
+    });
+  });
   it('maps /<lang>/writing/<slug> to an article, and an unknown slug to not found', () => {
     const [article] = ARTICLES;
     if (!article) return;
@@ -72,5 +84,28 @@ describe('inline language detection script', () => {
     // eslint-disable-next-line @typescript-eslint/no-implied-eval -- evaluating our own inline script is the point of this test
     const detect = new Function(`return ${detectLangExpression}`) as () => unknown;
     expect(detect()).toBe(resolveInitialLang({ stored, browserLanguages: languages }));
+  });
+});
+
+describe('inline language detection of the 404 page', () => {
+  const cases: { path: string; stored: string | null; languages: string[] }[] = [
+    { path: '/en/no-such-page', stored: 'vi', languages: ['vi-VN'] },
+    { path: '/vi/writing/nope', stored: 'en', languages: ['en-US'] },
+    { path: '/en/', stored: null, languages: ['vi'] },
+    { path: '/nope', stored: 'vi', languages: ['en'] },
+    { path: '/nope', stored: null, languages: ['vi-VN'] },
+    { path: '/fr/x', stored: null, languages: ['ja'] },
+  ];
+  afterAll(() => window.history.replaceState(null, '', '/'));
+
+  it.each(cases)('matches resolveRoute for %j', ({ path, stored, languages }) => {
+    window.history.replaceState(null, '', path);
+    if (stored === null) window.localStorage.removeItem(STORAGE_KEYS.lang);
+    else window.localStorage.setItem(STORAGE_KEYS.lang, stored);
+    Object.defineProperty(window.navigator, 'languages', { configurable: true, get: () => languages });
+
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval -- evaluating our own inline script is the point of this test
+    const detect = new Function(`return ${notFoundLangExpression}`) as () => unknown;
+    expect(detect()).toBe(resolveRoute({ pathname: path, stored, browserLanguages: languages }).lang);
   });
 });
