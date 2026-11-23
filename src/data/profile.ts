@@ -459,7 +459,7 @@ export const profile: Profile = {
       suffix: '%',
       label: {
         en: 'shorter release cycle on the Onflow frontends',
-        vi: 'chu kỳ release rút ngắn trên các frontend Onflow',
+        vi: 'rút ngắn chu kỳ release trên các frontend Onflow',
       },
       source: 'Onflow',
     },
@@ -760,8 +760,8 @@ export const profile: Profile = {
   ],
   projects: [
     {
-      // Counts from the repository at commit 027aae3 (2026-11-13): 14 tools registered in
-      // src/server.ts, 199 tests in `pnpm check`. The server keeps no password: it hands it to Taiga once.
+      // Counts from the repository at commit b88aec6 (2026-11-20): 14 + 3 tools registered in
+      // src/server.ts, 249 tests in CI. The server keeps no password: it hands it to Taiga once.
       id: 'taiga-mcp',
       name: 'Taiga MCP',
       year: 2026,
@@ -773,7 +773,7 @@ export const profile: Profile = {
       },
       metrics: [
         { value: '14 + 3', label: { en: 'read + write tools', vi: 'tool đọc + ghi' } },
-        { value: '243', label: { en: 'automated tests', vi: 'test tự động' } },
+        { value: '249', label: { en: 'automated tests', vi: 'test tự động' } },
         { value: '0', label: { en: 'passwords stored', vi: 'mật khẩu được lưu' } },
       ],
       tech: ['TypeScript', 'MCP SDK', 'OAuth 2.1', 'Express', 'Vitest'],
@@ -825,7 +825,7 @@ export const profile: Profile = {
       name: 'Onflow Fulfillment Connect',
       year: 2026,
       type: { en: 'Company product', vi: 'Sản phẩm công ty' },
-      role: { en: 'Built from scratch', vi: 'Xây dựng từ đầu' },
+      role: { en: 'Primary frontend developer, from day one', vi: 'Frontend developer chính từ ngày đầu' },
       description: {
         en: 'Fulfillment Connect lets a business keep the OMS or ERP it already runs and plug Onflow fulfillment into it. This is its console: create and track shipments, handle returns, run inbound orders, watch inventory and pull reports. Released behind feature flags.',
         vi: 'Fulfillment Connect giúp doanh nghiệp giữ nguyên OMS hoặc ERP đang dùng và kết nối với dịch vụ fulfillment của Onflow. Đây là giao diện của sản phẩm: tạo và theo dõi vận đơn, xử lý hoàn trả, quản lý đơn nhập hàng, theo dõi tồn kho và xuất báo cáo. Phát hành qua feature flag.',
@@ -945,7 +945,7 @@ export const profile: Profile = {
       url: 'https://bakery.kaidev.io.vn',
     },
   ],
-  // Nothing to list yet: the section (and the "Writing" navigation link) stays hidden while empty.
+  // Pieces published elsewhere. Articles on this site are listed in src/content/articles.ts.
   writing: [],
   // Summaries of feedback as the owner of this profile reported it, not verbatim quotations:
   // that is why no entry carries a name.

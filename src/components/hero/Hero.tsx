@@ -3,7 +3,7 @@ import { HeroVisual } from './HeroVisual';
 import { TOP_ID } from '@/components/layout/sections';
 import { ButtonLink } from '@/components/ui/Button';
 import { AI_WORKFLOW_ID } from '@/components/sections/AiWorkflow';
-import { ArrowDownIcon, MailIcon, PinIcon, SparkIcon } from '@/components/ui/Icons';
+import { ArrowDownIcon, DownloadIcon, MailIcon, PinIcon, SparkIcon } from '@/components/ui/Icons';
 import { StatusChip } from '@/components/ui/StatusChip';
 import { Typewriter } from '@/components/ui/Typewriter';
 import { Waves } from '@/components/ui/Waves';
@@ -95,6 +95,11 @@ export function Hero() {
             <ButtonLink href="#contact" variant="outline">
               <MailIcon size={16} />
               {t('hero.cta.contact')}
+            </ButtonLink>
+            {/* Recruiters come for this one; the other copy is at the end of the page. */}
+            <ButtonLink href={profile.cv[lang]} download variant="outline">
+              <DownloadIcon size={16} />
+              {t('contact.cv')}
             </ButtonLink>
           </div>
         </div>

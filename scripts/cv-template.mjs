@@ -7,6 +7,7 @@
  *
  * Used by scripts/cv.mjs, which prints it to PDF.
  */
+import { localNumber } from './lib.mjs';
 
 const LATIN =
   'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD';
@@ -269,7 +270,7 @@ export function renderCv({ profile, lang, t, fontUrl, avatarUrl, siteUrl, phone 
         <p class="label mono">${icon('spark')}<span>${say(project.type)} · ${project.year}</span></p>
         <h3>${project.demoUrl ? `<a href="${esc(project.demoUrl)}">${esc(project.name)}</a>` : esc(project.name)}</h3>
         <p class="what">${say(project.cvLine)}${project.repoUrl ? ` <a class="mono repo" href="${esc(project.repoUrl)}">${esc(project.repoUrl.replace(/^https:\/\//, ''))}</a>` : ''}</p>
-        <dl class="metrics">${project.metrics.map((metric) => `<div><dt>${say(metric.label)}</dt><dd>${esc(metric.value)}</dd></div>`).join('')}</dl>
+        <dl class="metrics">${project.metrics.map((metric) => `<div><dt>${say(metric.label)}</dt><dd>${esc(localNumber(metric.value, lang))}</dd></div>`).join('')}</dl>
       </article>`,
     )
     .join('');
@@ -283,7 +284,7 @@ export function renderCv({ profile, lang, t, fontUrl, avatarUrl, siteUrl, phone 
         <h3>${project.demoUrl ? `<a href="${esc(project.demoUrl)}">${esc(project.name)}</a>` : esc(project.name)}</h3>
         <p class="who">${esc(t('project.role'))}: ${say(project.role)}</p>
         <p class="what">${say(project.description)}</p>
-        <dl class="metrics">${project.metrics.map((metric) => `<div><dt>${say(metric.label)}</dt><dd>${esc(metric.value)}</dd></div>`).join('')}</dl>
+        <dl class="metrics">${project.metrics.map((metric) => `<div><dt>${say(metric.label)}</dt><dd>${esc(localNumber(metric.value, lang))}</dd></div>`).join('')}</dl>
         <p class="stack mono">${project.tech.map(esc).join(' · ')}</p>
       </article>`,
     )
@@ -294,7 +295,7 @@ export function renderCv({ profile, lang, t, fontUrl, avatarUrl, siteUrl, phone 
     <div class="ai-panel">
       <div class="ai-head">
         <h3>${say(ai.title)}</h3>
-        <p class="ai-facts">${ai.facts.map((fact) => `<span><b>${esc(fact.value)}</b>${say(fact.label)}</span>`).join('')}</p>
+        <p class="ai-facts">${ai.facts.map((fact) => `<span><b>${esc(localNumber(fact.value, lang))}</b>${say(fact.label)}</span>`).join('')}</p>
       </div>
       <ol class="steps">${ai.steps
         .map(

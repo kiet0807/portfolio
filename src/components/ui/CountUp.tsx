@@ -1,5 +1,7 @@
 import { useReducedMotion } from 'motion/react';
 import { useEffect, useRef } from 'react';
+import { useLang } from '@/i18n/useLang';
+import { localNumber } from '@/lib/number';
 
 interface CountUpProps {
   value: number;
@@ -17,25 +19,31 @@ const DURATION_MS = 1400;
  */
 export function CountUp({ value, decimals = 0, prefix = '', suffix = '' }: CountUpProps) {
   const ref = useRef<HTMLSpanElement>(null);
+  /** Counts once: switching the language afterwards only rewrites the number. */
+  const played = useRef(false);
   const reduce = useReducedMotion();
-  const finalText = `${prefix}${value.toFixed(decimals)}${suffix}`;
+  const { lang } = useLang();
+  const finalText = localNumber(`${prefix}${value.toFixed(decimals)}${suffix}`, lang);
 
   useEffect(() => {
     const el = ref.current;
     // Rewrite the existing text node so React keeps owning it.
     const textNode = el?.firstChild;
-    if (!el || !textNode || reduce === true || typeof IntersectionObserver === 'undefined') return;
+    if (!el || !textNode) return;
+    textNode.nodeValue = finalText;
+    if (played.current || reduce === true || typeof IntersectionObserver === 'undefined') return;
 
     let frame = 0;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry?.isIntersecting) return;
         observer.disconnect();
+        played.current = true;
         const start = performance.now();
         const tick = (now: number) => {
           const progress = Math.min(1, (now - start) / DURATION_MS);
           const eased = 1 - (1 - progress) ** 3;
-          textNode.nodeValue = `${prefix}${(value * eased).toFixed(decimals)}${suffix}`;
+          textNode.nodeValue = localNumber(`${prefix}${(value * eased).toFixed(decimals)}${suffix}`, lang);
           if (progress < 1) frame = requestAnimationFrame(tick);
         };
         frame = requestAnimationFrame(tick);
@@ -48,7 +56,7 @@ export function CountUp({ value, decimals = 0, prefix = '', suffix = '' }: Count
       cancelAnimationFrame(frame);
       textNode.nodeValue = finalText;
     };
-  }, [value, decimals, prefix, suffix, finalText, reduce]);
+  }, [value, decimals, prefix, suffix, lang, finalText, reduce]);
 
   return (
     <>

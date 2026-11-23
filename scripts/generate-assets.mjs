@@ -17,7 +17,7 @@ import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { Resvg } from '@resvg/resvg-js';
 import satori from 'satori';
 import { runnerImport } from 'vite';
-import { fromRoot, kb, pngSize } from './lib.mjs';
+import { fromRoot, kb, localNumber, pngSize } from './lib.mjs';
 
 const PUBLIC = fromRoot('public');
 const FONT_SRC = fromRoot('node_modules/@fontsource/space-grotesk/files');
@@ -417,7 +417,7 @@ function knowledgeFor(profile, articles, lang) {
       : 'Availability: not looking for new work at the moment.',
     `Email: ${profile.email}`,
     `Profiles: ${profile.socials.map((social) => `${social.label} ${social.url}`).join(', ')}`,
-    `CV: a PDF can be downloaded from the Contact section of this website.`,
+    `CV: a PDF can be downloaded at the top of this website and from its Contact section.`,
     '',
     'ABOUT',
     ...profile.about.map(say),
@@ -432,7 +432,8 @@ function knowledgeFor(profile, articles, lang) {
     '',
     'HEADLINE NUMBERS',
     ...profile.stats.map(
-      (stat) => `- ${stat.prefix ?? ''}${stat.value}${stat.suffix ?? ''} ${say(stat.label)} (${stat.source})`,
+      (stat) =>
+        `- ${stat.prefix ?? ''}${localNumber(String(stat.value), lang)}${stat.suffix ?? ''} ${say(stat.label)} (${stat.source})`,
     ),
     '',
     'SKILLS, WITH YEARS OF USE',
@@ -464,7 +465,7 @@ function knowledgeFor(profile, articles, lang) {
     'FEATURED PROJECTS',
     ...profile.projects.flatMap((project) => [
       `${project.name} (${project.year}, ${say(project.type)}). Role: ${say(project.role)}. ${say(project.description)}`,
-      `- ${project.metrics.map((metric) => `${metric.value} ${say(metric.label)}`).join('; ')}`,
+      `- ${project.metrics.map((metric) => `${localNumber(metric.value, lang)} ${say(metric.label)}`).join('; ')}`,
       `- Tech: ${project.tech.join(', ')}${project.demoUrl ? `. Product page: ${project.demoUrl}` : ''}`,
     ]),
     '',

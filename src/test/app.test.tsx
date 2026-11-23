@@ -54,9 +54,12 @@ describe('language switch', () => {
   it('links the CV that matches the language', async () => {
     const user = userEvent.setup();
     renderPage('en');
-    expect(screen.getByRole('link', { name: t('en', 'contact.cv') })).toHaveAttribute('href', profile.cv.en);
+    // In the hero, and again in the contact section at the end of the page.
+    const links = (lang: 'en' | 'vi') =>
+      screen.getAllByRole('link', { name: t(lang, 'contact.cv') }).map((link) => link.getAttribute('href'));
+    expect(links('en')).toEqual([profile.cv.en, profile.cv.en]);
     await user.click(screen.getByRole('button', { name: t('en', 'lang.switch') }));
-    expect(screen.getByRole('link', { name: t('vi', 'contact.cv') })).toHaveAttribute('href', profile.cv.vi);
+    expect(links('vi')).toEqual([profile.cv.vi, profile.cv.vi]);
   });
 });
 

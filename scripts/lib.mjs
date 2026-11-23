@@ -6,6 +6,9 @@ export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 export const fromRoot = (...segments) => resolve(ROOT, ...segments);
 
+/** The decimal mark of the language, as src/lib/number.ts does on the page. */
+export const localNumber = (text, lang) => (lang === 'vi' ? text.replace(/(\d)\.(\d)/g, '$1,$2') : text);
+
 export const kb = (bytes) => `${(bytes / 1024).toFixed(1)} KB`;
 
 /** Width/height of a PNG, read from its IHDR chunk. */

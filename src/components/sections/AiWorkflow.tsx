@@ -2,6 +2,7 @@ import { CheckIcon, SparkIcon } from '@/components/ui/Icons';
 import { Reveal } from '@/components/ui/Reveal';
 import { profile } from '@/data/profile';
 import { useLang } from '@/i18n/useLang';
+import { localNumber } from '@/lib/number';
 
 /** Target of the AI badge in the hero. */
 export const AI_WORKFLOW_ID = 'ai-workflow';
@@ -52,7 +53,7 @@ export function AiWorkflow() {
                 <div key={fact.value} className="flex flex-col-reverse justify-end">
                   <dt className="mt-1 text-xs text-pretty text-muted sm:text-sm">{fact.label[lang]}</dt>
                   <dd className="text-gradient-ai font-display text-2xl font-bold tracking-tight sm:text-3xl">
-                    {fact.value}
+                    {localNumber(fact.value, lang)}
                   </dd>
                 </div>
               ))}

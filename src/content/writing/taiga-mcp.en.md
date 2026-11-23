@@ -113,8 +113,8 @@ The first version only read, on purpose: writing should come only once reading i
 Writing has to pass three locks:
 
 ```
-1. The server allows it   an environment variable; switching it off revokes writing for every connection at once
-2. The person allows it   a box at sign-in, unticked by default; the choice is sealed into their token
+1. The server allows it      an environment variable; switching it off revokes writing for every connection at once
+2. The person allows it      a box at sign-in, unticked by default; the choice is sealed into their token
 3. The HTTP layer allows it  on a read-only connection every write is refused, whoever calls it
 ```
 
@@ -143,7 +143,7 @@ the change still makes sense, and retry with the new version.
 
 ## Testing: a fake Taiga, then a real one
 
-The test suite never touches the network. A stand-in for `fetch` records every request and answers from the data of an invented project, "Acme Billing". Each test checks both directions: **the question sent to Taiga** (the right filters?) and **the answer written for the model** (the right words?). The tests go through a real MCP client talking to the server in memory; the hosted server is started on a real local port and taken through the whole OAuth flow. There are 243 tests, plus 53 questions run against a public project on Taiga cloud.
+The test suite never touches the network. A stand-in for `fetch` records every request and answers from the data of an invented project, "Acme Billing". Each test checks both directions: **the question sent to Taiga** (the right filters?) and **the answer written for the model** (the right words?). The tests go through a real MCP client talking to the server in memory; the hosted server is started on a real local port and taken through the whole OAuth flow. There are 249 tests, plus 53 questions run against a public project on Taiga cloud.
 
 Even so, real data finds what invented data misses. Run against a real Taiga that a team uses every day, `list_activity` answered "no activity" for the week, while new stories were appearing every day. The cause was not in the code: Taiga's shared activity log had stopped being written weeks earlier, while each item's own history was still recorded. An honest tool should not report "a quiet week". It now says on which day the log ends, and points to the sources that are still right.
 

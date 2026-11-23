@@ -143,7 +143,7 @@ the change still makes sense, and retry with the new version.
 
 ## Kiểm thử: Taiga giả, rồi Taiga thật
 
-Bộ test không gọi mạng. Một hàm thay thế `fetch` ghi lại mọi yêu cầu và trả lời từ dữ liệu của một project bịa, "Acme Billing". Mỗi test kiểm hai chiều: **câu hỏi gửi tới Taiga** có đúng bộ lọc không, và **câu trả lời viết cho model** có đúng chữ không. Các test đi qua một client MCP thật nói chuyện với server trong bộ nhớ; bản hosted thì được dựng trên một cổng máy thật và đi trọn luồng OAuth. Hiện có 243 test, cộng 53 câu hỏi chạy trên một project công khai của Taiga cloud.
+Bộ test không gọi mạng. Một hàm thay thế `fetch` ghi lại mọi yêu cầu và trả lời từ dữ liệu của một project bịa, "Acme Billing". Mỗi test kiểm hai chiều: **câu hỏi gửi tới Taiga** có đúng bộ lọc không, và **câu trả lời viết cho model** có đúng chữ không. Các test đi qua một client MCP thật nói chuyện với server trong bộ nhớ; bản hosted thì được dựng trên một cổng máy thật và đi trọn luồng OAuth. Hiện có 249 test, cộng 53 câu hỏi chạy trên một project công khai của Taiga cloud.
 
 Dù vậy, dữ liệu thật vẫn tìm ra những thứ dữ liệu giả bỏ sót. Khi chạy trên một Taiga thật, đang được cả team dùng hằng ngày, `list_activity` trả lời "không có hoạt động nào" cho tuần đó, trong khi story mới xuất hiện mỗi ngày. Nguyên nhân không nằm ở code: nhật ký chung của Taiga đã ngừng ghi từ vài tuần trước, còn lịch sử của từng mục vẫn được ghi bình thường. Một tool trung thực không nên nói "tuần này yên ắng". Giờ nó nói nhật ký kết thúc vào ngày nào và chỉ sang nguồn còn đúng.
 

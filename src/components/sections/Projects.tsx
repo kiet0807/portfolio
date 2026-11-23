@@ -7,6 +7,7 @@ import { TiltCard } from '@/components/ui/TiltCard';
 import { profile, type Project } from '@/data/profile';
 import { cn } from '@/lib/cn';
 import { useLang } from '@/i18n/useLang';
+import { localNumber } from '@/lib/number';
 
 const linkClass =
   'text-link inline-flex min-h-9 items-center gap-1.5 text-sm font-medium underline-offset-4 hover:underline';
@@ -58,7 +59,7 @@ function ProjectCard({ project }: { project: Project }) {
             >
               <dt className="mt-0.5 text-xs text-pretty text-muted">{metric.label[lang]}</dt>
               <dd className="font-mono text-base font-bold whitespace-nowrap text-fg tabular-nums">
-                {metric.value}
+                {localNumber(metric.value, lang)}
               </dd>
             </div>
           ))}

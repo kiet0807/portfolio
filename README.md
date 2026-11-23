@@ -20,7 +20,7 @@ pnpm dev          # http://localhost:5173 (tự chuyển sang /en hoặc /vi)
 | `pnpm preview`    | Xem bản build tại http://127.0.0.1:4173, mô phỏng Vercel (clean URL, trang 404 thật)                  |
 | `pnpm check`      | typecheck + lint + format + test + build. Chạy trước khi deploy                                       |
 | `pnpm qa`         | Kiểm tra trên Chrome thật: responsive, bàn phím, đổi ngôn ngữ, 3D và fallback. Cần `pnpm build` trước |
-| `pnpm lighthouse` | Đo Lighthouse mobile cho `/en` và `/vi`. Cần `pnpm build` trước                                       |
+| `pnpm lighthouse` | Đo Lighthouse mobile cho `/en`, `/vi` và bốn trang bài viết. Cần `pnpm build` trước                   |
 | `pnpm cv`         | Sinh `cv-en.pdf` và `cv-vi.pdf` (bố cục CV riêng, 2 trang A4) từ `profile.ts`                         |
 | `pnpm cv:private` | Bản CV có số điện thoại (đọc từ `private/contact.json`), ghi vào `private/`, không lên trang          |
 | `pnpm assets`     | Chỉ sinh lại ảnh OG, icon, font                                                                       |
@@ -71,13 +71,13 @@ Các trường `seo.title`, `seo.description` quyết định tiêu đề và m�
 
 Một số trường điều khiển các chi tiết trang trí:
 
-| Trường         | Hiển thị ở đâu                                                                       |
-| -------------- | ------------------------------------------------------------------------------------ |
-| `stats`        | Dải bốn con số dưới hero. Mỗi số gồm `prefix` + `value` + `suffix`, có hiệu ứng đếm  |
-| `availability` | Nhãn trạng thái có chấm nhấp nháy ở hero và phần Liên hệ. Đặt `open: false` để ẩn    |
-| `focus`        | Dòng chữ tự gõ dưới chức danh, và mảng `focus` trong thẻ code ở phần Giới thiệu      |
-| `timeZone`     | Đồng hồ giờ địa phương ở footer. Dùng tên múi giờ IANA, ví dụ `Asia/Ho_Chi_Minh`     |
-| `skills`       | Ngoài phần Kỹ năng, còn sinh ra dải chữ chạy dưới hero và ba nhãn nổi quanh khối cầu |
+| Trường         | Hiển thị ở đâu                                                                        |
+| -------------- | ------------------------------------------------------------------------------------- |
+| `stats`        | Dải bốn con số dưới hero. Mỗi số gồm `prefix` + `value` + `suffix`, có hiệu ứng đếm   |
+| `availability` | Nhãn trạng thái có chấm nhấp nháy ở hero và phần Liên hệ. Đặt `open: false` để ẩn     |
+| `focus`        | Dòng chữ tự gõ dưới chức danh, và mảng `focus` trong thẻ code ở phần Giới thiệu       |
+| `timeZone`     | Đồng hồ giờ địa phương ở footer. Dùng tên múi giờ IANA, ví dụ `Asia/Ho_Chi_Minh`      |
+| `skills`       | Ngoài phần Kỹ năng, còn sinh ra dải chữ chạy dưới hero và dòng `stack` trong thẻ code |
 
 Thẻ code `about.ts` ở phần Giới thiệu không cần sửa tay. Nó tự lấy tên, chức danh, địa điểm, kỹ năng và `focus` từ `profile.ts`.
 
@@ -117,7 +117,7 @@ pnpm cv
 
 - Bố cục và kiểu chữ nằm ở [`scripts/cv-template.mjs`](scripts/cv-template.mjs); [`scripts/cv.mjs`](scripts/cv.mjs) in nó ra PDF bằng Chrome.
 - CV luôn gọn trong 2 trang: script thử cỡ chữ từ 9.2pt xuống 8pt và dừng ở cỡ lớn nhất vừa 2 trang. Nếu 8pt vẫn tràn, script báo lỗi và không ghi file; khi đó hãy rút gọn phần kinh nghiệm hoặc mô tả dự án.
-- CV gồm: tóm tắt (trường `cvSummary` trong `profile.ts`, viết riêng theo giọng CV), bốn số liệu, kinh nghiệm, ba dự án nổi bật, cách làm việc với AI, kỹ năng, học vấn và ghi nhận. Phần "Dự án khác" không in vì kinh nghiệm đã nhắc tới. Chân mỗi trang có tên và số trang.
+- CV gồm: tóm tắt (trường `cvSummary` trong `profile.ts`, viết riêng theo giọng CV), kinh nghiệm, các dự án nổi bật (dự án có `cvLine` in thành một hàng ngang, còn lại là thẻ), cách làm việc với AI, kỹ năng, học vấn và ghi nhận, "Đang tìm hiểu". Dải bốn số liệu chỉ có trên trang. Phần "Dự án khác" không in vì kinh nghiệm đã nhắc tới. Chân mỗi trang có tên và số trang.
 - Chữ trong file PDF nằm đúng thứ tự đọc (tiêu đề mục, chức danh, rồi từng gạch đầu dòng), để phần mềm lọc hồ sơ và thao tác sao chép đọc được đúng. Vì vậy template không dùng `position` cho phần tử có chữ; giữ nguyên tắc này khi sửa.
 - Địa chỉ portfolio chỉ được in khi `siteUrl` (hoặc biến `SITE_URL`) không còn là tên miền giữ chỗ.
 - Lệnh ghi PDF vào `public/` (nguồn, bản build sau sẽ dùng) và vào `dist/` nếu đã có bản build. Nút "Tải CV" tự chọn file theo ngôn ngữ đang xem.
@@ -168,7 +168,7 @@ Trừ bảng lệnh và bot hướng dẫn (hai thứ dùng được thật), c�
 
 | Chi tiết                                                                         | Nằm ở đâu                                                                                                                          |
 | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Nền lưới, số thứ tự lớn `01` đến `05`                                            | [`Section.tsx`](src/components/sections/Section.tsx), `tech-grid` và `section-numeral` trong CSS                                   |
+| Nền lưới, số thứ tự lớn `01` đến `06`                                            | [`Section.tsx`](src/components/sections/Section.tsx), `tech-grid` và `section-numeral` trong CSS                                   |
 | Vòng HUD và khung ngắm quanh khối cầu                                            | `Hud` trong [`HeroVisual.tsx`](src/components/hero/HeroVisual.tsx)                                                                 |
 | Dòng chữ tự gõ                                                                   | [`Typewriter.tsx`](src/components/ui/Typewriter.tsx)                                                                               |
 | Dải chữ chạy                                                                     | [`TechMarquee.tsx`](src/components/sections/TechMarquee.tsx)                                                                       |
@@ -183,7 +183,7 @@ Trừ bảng lệnh và bot hướng dẫn (hai thứ dùng được thật), c�
 | Bảng lệnh (⌘K, Ctrl K hoặc `/`)                                                  | [`CommandPalette.tsx`](src/components/layout/CommandPalette.tsx), tải lười khi mở lần đầu                                          |
 | Tiêu đề nét mảnh, tên riêng bằng chữ serif nghiêng                               | [`Hero.tsx`](src/components/hero/Hero.tsx), [`SectionHeading.tsx`](src/components/ui/SectionHeading.tsx), `accent-serif` trong CSS |
 | Nền sao trôi chậm khi cuộn (chỉ ở giao diện tối)                                 | `.starfield` và utility `stars` trong CSS                                                                                          |
-| Mục lục dọc `00` đến `05` bên phải (từ 1280px)                                   | [`SectionRail.tsx`](src/components/layout/SectionRail.tsx)                                                                         |
+| Mục lục dọc `00` đến `06` bên phải (từ 1280px)                                   | [`SectionRail.tsx`](src/components/layout/SectionRail.tsx)                                                                         |
 | Header thành viên thuốc kính nổi sau khi cuộn (từ 768px)                         | [`Header.tsx`](src/components/layout/Header.tsx)                                                                                   |
 | Mạng lưới đơn hàng quanh khối cầu                                                | [`OrderNetwork.tsx`](src/components/hero/OrderNetwork.tsx); bản tĩnh là `ORBITS` trong `HeroVisual.tsx`                            |
 | Huy hiệu "AI-native Developer" ở hero và khối "Phát triển cùng AI, có kiểm soát" | [`AiWorkflow.tsx`](src/components/sections/AiWorkflow.tsx), nội dung ở `ai` trong `profile.ts`                                     |
@@ -307,21 +307,21 @@ Vercel tự phục vụ `dist/404.html` với mã trạng thái 404 cho mọi đ
 
 ## Kết quả đã đo
 
-Đo ngày 12/11/2026 trên bản build production, chạy cục bộ (macOS, Apple M4, Chrome, Node 24), nội dung thật trong `profile.ts`. Kết quả sau khi deploy có thể khác theo mạng và máy chủ; chạy lại `pnpm qa` và `pnpm lighthouse` để có số của bạn.
+Đo ngày 23/11/2026 trên bản build production, chạy cục bộ (macOS, Apple M4, Chrome, Node 24), nội dung thật trong `profile.ts`. Kết quả sau khi deploy có thể khác theo mạng và máy chủ; chạy lại `pnpm qa` và `pnpm lighthouse` để có số của bạn.
 
-| Hạng mục                                           | Kết quả                                                                                                                                             |
-| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm typecheck`, `pnpm lint`, `pnpm format:check` | Đạt, 0 lỗi, 0 warning                                                                                                                               |
-| `pnpm test`                                        | 129/129 test đạt                                                                                                                                    |
-| `pnpm build`                                       | Đạt, không warning                                                                                                                                  |
-| JS tải ban đầu                                     | 138.2 KB gzip (ngân sách 150 KB). Tải lười: chunk 3D 232.3 KB, bảng chat 3.4 KB, bảng lệnh 2.7 KB, mỗi bài viết khoảng 3 KB, bộ đọc Markdown 1.2 KB |
-| `pnpm qa`                                          | 79/79 kiểm tra đạt, ở 6 độ rộng từ 360px đến 2560px. Phần AI của chatbot chạy với một máy chủ giả lập Gemini                                        |
-| Lighthouse mobile `/en`                            | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                  |
-| Lighthouse mobile `/vi`                            | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                  |
-| Lighthouse mobile trang bài viết (`/vi/writing/…`) | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                  |
-| In trang (Ctrl/Cmd + P)                            | 4 trang A4 mỗi ngôn ngữ, nền sáng, không còn phần nào bị ẩn                                                                                         |
-| `pnpm cv`                                          | 2 trang A4 mỗi ngôn ngữ, cỡ chữ 8pt ở cả hai bản                                                                                                    |
-| Chế độ tương phản cao (giả lập)                    | Nút có viền, mục đang chọn phân biệt được                                                                                                           |
+| Hạng mục                                           | Kết quả                                                                                                                                                |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `pnpm typecheck`, `pnpm lint`, `pnpm format:check` | Đạt, 0 lỗi, 0 warning                                                                                                                                  |
+| `pnpm test`                                        | 156/156 test đạt                                                                                                                                       |
+| `pnpm build`                                       | Đạt, không warning                                                                                                                                     |
+| JS tải ban đầu                                     | 140.2 KB gzip (ngân sách 150 KB). Tải lười: chunk 3D 232.4 KB, bảng chat 3.4 KB, bảng lệnh 2.8 KB, mỗi bài viết 3.4 đến 6.5 KB, bộ đọc Markdown 1.4 KB |
+| `pnpm qa`                                          | 81/81 kiểm tra đạt, ở 6 độ rộng từ 360px đến 2560px. Phần AI của chatbot chạy với một máy chủ giả lập Gemini                                           |
+| Lighthouse mobile `/en`                            | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                     |
+| Lighthouse mobile `/vi`                            | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                     |
+| Lighthouse mobile 4 trang bài viết (`/en`, `/vi`)  | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                     |
+| In trang (Ctrl/Cmd + P)                            | 4 trang A4 mỗi ngôn ngữ, nền sáng, không còn phần nào bị ẩn                                                                                            |
+| `pnpm cv`                                          | 2 trang A4 mỗi ngôn ngữ, cỡ chữ 8pt (Anh) và 8.1pt (Việt)                                                                                              |
+| Chế độ tương phản cao (giả lập)                    | Nút có viền, mục đang chọn phân biệt được                                                                                                              |
 
 Chưa kiểm tra: trình duyệt Safari và Firefox, thiết bị di động thật, trình đọc màn hình thật, máy in thật và chế độ tương phản cao trên Windows thật. Phần in và tương phản cao mới chỉ được kiểm tra bằng chế độ giả lập của Chrome.
 
