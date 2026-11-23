@@ -7,7 +7,8 @@
  *
  * It also marks the first page view of a browser session with data-first-visit, which
  * is what lets the guide bot fly in from its very first frame (styles.css). Visitors who
- * prefer reduced motion never get the attribute.
+ * prefer reduced motion never get the attribute, nor do those who paused motion on this
+ * site: their choice is restored as data-motion="paused" (src/lib/motion.ts).
  *
  * Kept dependency-free: vite.config.ts injects it and the prerender step hashes it
  * for the Content-Security-Policy.
@@ -17,7 +18,10 @@ export const THEME_STORAGE_KEY = 'portfolio:theme';
 /** sessionStorage key written once the bot's first-visit flight has started. */
 export const VISITED_STORAGE_KEY = 'portfolio:visited';
 
+/** localStorage key of the "pause motion" choice (src/lib/motion.ts); "paused" or absent. */
+export const MOTION_STORAGE_KEY = 'portfolio:motion';
+
 /** Browser UI colour (address bar) per theme; matches the page background. */
 export const THEME_COLOR = { dark: '#0a0f1a', light: '#f8fafc' } as const;
 
-export const themeInlineScript = `(function(){var d=document.documentElement,t='dark';try{if(localStorage.getItem('${THEME_STORAGE_KEY}')==='light')t='light'}catch(e){}d.setAttribute('data-theme',t);if(t==='light'){var c=document.querySelector('meta[name="theme-color"]');if(c)c.setAttribute('content','${THEME_COLOR.light}')}try{if(!sessionStorage.getItem('${VISITED_STORAGE_KEY}')&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)d.setAttribute('data-first-visit','')}catch(e){}})();`;
+export const themeInlineScript = `(function(){var d=document.documentElement,t='dark';try{if(localStorage.getItem('${THEME_STORAGE_KEY}')==='light')t='light'}catch(e){}d.setAttribute('data-theme',t);if(t==='light'){var c=document.querySelector('meta[name="theme-color"]');if(c)c.setAttribute('content','${THEME_COLOR.light}')}var m=false;try{m=localStorage.getItem('${MOTION_STORAGE_KEY}')==='paused'}catch(e){}if(m)d.setAttribute('data-motion','paused');try{if(!m&&!sessionStorage.getItem('${VISITED_STORAGE_KEY}')&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)d.setAttribute('data-first-visit','')}catch(e){}})();`;

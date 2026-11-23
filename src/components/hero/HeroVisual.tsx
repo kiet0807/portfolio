@@ -6,6 +6,7 @@ import { usePageVisible } from '@/hooks/usePageVisible';
 import { profile } from '@/data/profile';
 import { cn } from '@/lib/cn';
 import { isLowEndDevice, readDeviceSignals } from '@/lib/device';
+import { useMotionPaused } from '@/lib/motion';
 
 // three.js + react-three-fiber live in this chunk only; it is never part of the initial bundle.
 const Scene3D = lazy(() => import('./Scene3D'));
@@ -161,6 +162,8 @@ export function HeroVisual() {
   const [ready, setReady] = useState(false);
 
   const reducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
+  // Paused motion keeps the static backdrop (its loops stopped by CSS): a live scene cannot be held still.
+  const paused = useMotionPaused();
   const wide = useMediaQuery('(min-width: 768px)');
   const inView = useInViewport(ref);
   const pageVisible = usePageVisible();
@@ -175,7 +178,7 @@ export function HeroVisual() {
 
   const onFail = useCallback(() => setFailed(true), []);
 
-  const show3D = capable && !failed && !reducedMotion && wide;
+  const show3D = capable && !failed && !reducedMotion && !paused && wide;
   const sceneVisible = show3D && ready;
 
   return (

@@ -1935,7 +1935,7 @@ await check(
 );
 
 await check(
-  'guide bot: on the first visit its head flies in and lands in the ring; later views sit still',
+  'guide bot: on the first visit its head flies in (pops up on a phone) and lands in the ring; later views sit still',
   async () => {
     const where = (page) =>
       page.evaluate(() => {
@@ -2031,6 +2031,71 @@ await check(
       );
     } finally {
       await calm.close();
+    }
+
+    // Below 1024px the sphere sits under the text: the head only pops up in its ring, and the
+    // greeting, which covers part of a phone screen, goes away as soon as the page scrolls.
+    const phone = await open('/en', {
+      width: 390,
+      height: 844,
+      firstVisit: true,
+      waitUntil: 'domcontentloaded',
+    });
+    try {
+      await sleep(1200);
+      const popping = await where(phone.page);
+      assert(popping.away <= 14, `on a phone the head flies across the page: ${JSON.stringify(popping)}`);
+      await sleep(1600);
+      const landed = await where(phone.page);
+      const greeting = () => phone.page.$eval('[data-bot-greeting]', (el) => el.dataset.botGreeting);
+      assert(!landed.flying && landed.away <= 14, `on a phone, after the pop: ${JSON.stringify(landed)}`);
+      assert((await greeting()) === 'shown', 'on a phone Kai does not say hello');
+      await phone.page.evaluate(() => window.scrollBy(0, 200));
+      await sleep(300);
+      assert((await greeting()) === 'hidden', 'the greeting stays up after the page scrolled');
+      assert(phone.problems.length === 0, phone.problems.join('\n'));
+    } finally {
+      await phone.close();
+    }
+  },
+);
+
+await check(
+  'pause motion: the footer switch stops what loops, survives a reload, and turns it back on',
+  async () => {
+    const { page, problems, close } = await open('/en');
+    try {
+      const state = () =>
+        page.evaluate(() => ({
+          motion: document.documentElement.dataset.motion ?? null,
+          marquee: getComputedStyle(document.querySelector('[class*="animate-marquee"]')).animationPlayState,
+          visual: document.querySelector('[data-hero-visual]')?.dataset.heroVisual,
+          label: document.querySelector('[data-motion-toggle]')?.textContent,
+        }));
+      const before = await state();
+      assert(before.motion === null && before.marquee === 'running', `at first: ${JSON.stringify(before)}`);
+      await page.click('[data-motion-toggle]');
+      const paused = await state();
+      assert(
+        paused.motion === 'paused' && paused.marquee === 'paused' && paused.label === 'Resume motion',
+        `after pausing: ${JSON.stringify(paused)}`,
+      );
+      await page.reload({ waitUntil: 'networkidle0' });
+      await sleep(1500);
+      const reloaded = await state();
+      assert(
+        reloaded.motion === 'paused' && reloaded.marquee === 'paused' && reloaded.visual === 'static',
+        `after a reload: ${JSON.stringify(reloaded)}`,
+      );
+      await page.click('[data-motion-toggle]');
+      const resumed = await state();
+      assert(
+        resumed.motion === null && resumed.marquee === 'running',
+        `after resuming: ${JSON.stringify(resumed)}`,
+      );
+      assert(problems.length === 0, problems.join('\n'));
+    } finally {
+      await close();
     }
   },
 );

@@ -1,9 +1,10 @@
 import { TOP_ID } from './sections';
 import { Vitals } from './Vitals';
-import { ClockIcon, PinIcon } from '@/components/ui/Icons';
+import { ClockIcon, PauseIcon, PinIcon, PlayIcon } from '@/components/ui/Icons';
 import { profile } from '@/data/profile';
 import { useClock } from '@/hooks/useClock';
 import { useLang } from '@/i18n/useLang';
+import { setMotionPaused, useMotionPaused } from '@/lib/motion';
 
 /** What this site itself is made of. Shown as chips in the footer. */
 const SITE_STACK = ['React 19', 'TypeScript', 'Vite', 'Tailwind CSS 4', 'Motion', 'Three.js'] as const;
@@ -14,6 +15,7 @@ const BUILD_DATE = import.meta.env.VITE_BUILD_DATE ?? '';
 export function Footer() {
   const { lang, t } = useLang();
   const clock = useClock(profile.timeZone);
+  const paused = useMotionPaused();
   return (
     <footer className="relative isolate overflow-hidden border-t border-line print:hidden">
       <div
@@ -68,12 +70,24 @@ export function Footer() {
               </span>
             ) : null}
           </p>
-          <a
-            href={`#${TOP_ID}`}
-            className="inline-flex min-h-9 items-center text-sm font-medium text-link underline-offset-4 hover:underline"
-          >
-            {t('nav.home')} ↑
-          </a>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-1">
+            {/* WCAG 2.2.2: a way to stop what loops by itself, besides the system setting. Also in the command menu. */}
+            <button
+              type="button"
+              data-motion-toggle=""
+              onClick={() => setMotionPaused(!paused)}
+              className="inline-flex min-h-9 items-center gap-1.5 text-sm font-medium text-link underline-offset-4 hover:underline"
+            >
+              {paused ? <PlayIcon size={16} /> : <PauseIcon size={16} />}
+              {t(paused ? 'motion.resume' : 'motion.pause')}
+            </button>
+            <a
+              href={`#${TOP_ID}`}
+              className="inline-flex min-h-9 items-center text-sm font-medium text-link underline-offset-4 hover:underline"
+            >
+              {t('nav.home')} ↑
+            </a>
+          </div>
         </div>
       </div>
     </footer>

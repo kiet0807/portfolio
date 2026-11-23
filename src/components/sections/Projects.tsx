@@ -1,9 +1,17 @@
 import { ProjectVisual } from './ProjectVisual';
 import { Section } from './Section';
-import { ArrowUpRightIcon, ExternalIcon, GithubIcon, LockIcon, SparkIcon } from '@/components/ui/Icons';
+import {
+  ArrowRightIcon,
+  ArrowUpRightIcon,
+  ExternalIcon,
+  GithubIcon,
+  LockIcon,
+  SparkIcon,
+} from '@/components/ui/Icons';
 import { Reveal } from '@/components/ui/Reveal';
 import { Tag } from '@/components/ui/Tag';
 import { TiltCard } from '@/components/ui/TiltCard';
+import { articlePath, findArticle } from '@/content/articles';
 import { profile, type Project } from '@/data/profile';
 import { cn } from '@/lib/cn';
 import { useLang } from '@/i18n/useLang';
@@ -19,6 +27,7 @@ const linkClass =
 function ProjectCard({ project }: { project: Project }) {
   const { lang, t } = useLang();
   const ai = project.ai === true;
+  const article = findArticle(project.article);
   return (
     <TiltCard
       accent={ai ? 'ai' : undefined}
@@ -70,6 +79,17 @@ function ProjectCard({ project }: { project: Project }) {
           ))}
         </ul>
         <div className="mt-auto flex flex-wrap gap-x-6 gap-y-1 pt-6 print:block print:pt-2">
+          {article ? (
+            // The write-up sits near the end of a long page: this brings it up to the work it is about.
+            <a href={articlePath(lang, article.slug)} className={cn(linkClass, 'group print:hidden')}>
+              {t('project.article')}
+              <ArrowRightIcon
+                size={16}
+                className="transition-transform duration-300 ease-water group-hover:translate-x-0.5"
+              />
+              <span className="sr-only">: {article.title[lang]}</span>
+            </a>
+          ) : null}
           {project.demoUrl ? (
             <a
               href={project.demoUrl}

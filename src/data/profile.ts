@@ -55,6 +55,8 @@ export interface Project {
   readonly appUrl?: string;
   /** Public repository. Leave out for company work: the card then says the source is private. */
   readonly repoUrl?: string;
+  /** Slug of an article on this site about the project (src/content/articles.ts): the card links to it. */
+  readonly article?: string;
   /** Which built-in wireframe to draw (default: 'generic'). Ignored when `image` is set. */
   readonly visual?: ProjectVisualKind;
   /**
@@ -764,6 +766,7 @@ export const profile: Profile = {
       // src/server.ts, 249 tests in CI. The server keeps no password: it hands it to Taiga once.
       id: 'taiga-mcp',
       name: 'Taiga MCP',
+      article: 'taiga-mcp',
       year: 2026,
       type: { en: 'Open source', vi: 'Mã nguồn mở' },
       role: { en: 'Author', vi: 'Tác giả' },
@@ -800,6 +803,7 @@ export const profile: Profile = {
     {
       id: 'oms',
       name: 'Onflow OMS',
+      article: 'typescript-migration',
       year: 2026,
       type: { en: 'Company product', vi: 'Sản phẩm công ty' },
       role: { en: 'Primary frontend developer', vi: 'Frontend developer chính' },

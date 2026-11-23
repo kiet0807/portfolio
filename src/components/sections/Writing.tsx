@@ -1,7 +1,7 @@
 import { Section } from './Section';
 import { ArrowRightIcon, ArrowUpRightIcon } from '@/components/ui/Icons';
 import { Reveal } from '@/components/ui/Reveal';
-import { ARTICLES, articlePath } from '@/content/articles';
+import { ARTICLES, articlePath, articleTransitionName } from '@/content/articles';
 import { profile } from '@/data/profile';
 import { useLang } from '@/i18n/useLang';
 import { cn } from '@/lib/cn';
@@ -92,7 +92,17 @@ export function Writing() {
                       data-writing-link=""
                       className="text-lg font-bold text-pretty underline-offset-4 group-hover:text-link after:absolute after:inset-0 hover:underline print:text-base print:after:static"
                     >
-                      {item.title}
+                      {item.external ? (
+                        item.title
+                      ) : (
+                        // A box of its own, so that a title on two lines can still be carried across.
+                        <span
+                          className="inline-block"
+                          style={{ viewTransitionName: articleTransitionName(item.id) }}
+                        >
+                          {item.title}
+                        </span>
+                      )}
                       {item.external ? <span className="sr-only"> ({t('a11y.external')})</span> : null}
                     </a>
                     {item.summary ? (

@@ -105,6 +105,8 @@ JavaScript, có thẻ chia sẻ dạng bài viết và JSON-LD `BlogPosting`). �
 Bài tự xuất hiện ở mục "Bài viết" trên trang chủ, trong sitemap, trong bảng lệnh (Ctrl/Cmd + K) và trong những gì Kai
 biết, và có ảnh xem trước riêng mang tiêu đề bài khi chia sẻ đường dẫn (xem "Ảnh Open Graph"). Nội dung bài được tải riêng cho trang bài đó, không làm nặng trang chủ. Mục "Bài viết" không in ra giấy.
 
+Bài viết về một dự án: thêm `article: '<slug>'` vào dự án đó trong `profile.ts`, thẻ dự án sẽ có link "Đọc bài viết" (ẩn khi in). Đi từ trang chủ sang bài và ngược lại, trình duyệt hỗ trợ View Transitions giữa hai trang (Chrome, Edge, Safari 18.2 trở lên) cho trang mờ chuyển và tiêu đề bài trượt từ danh sách sang trang bài: cả hai nơi mang cùng `view-transition-name` (`articleTransitionName` trong `articles.ts`). Trình duyệt khác chỉ chuyển trang bình thường, và người bật "giảm chuyển động" không có hiệu ứng này.
+
 Bài đăng ở nơi khác (Viblo, LinkedIn, bài nói) vẫn khai báo ở `profile.writing`; chúng mở trong tab mới.
 
 ### CV
@@ -191,6 +193,8 @@ Trừ bảng lệnh và bot hướng dẫn (hai thứ dùng được thật), c�
 
 Muốn bỏ chi tiết nào, xoá component tương ứng khỏi nơi nó được gọi. Không phần nào phụ thuộc phần nào.
 
+Khách không bật "giảm chuyển động" trong hệ điều hành vẫn dừng được mọi thứ tự chuyển động (WCAG 2.2.2): nút "Tạm dừng chuyển động" ở footer, và cùng lệnh đó trong bảng lệnh. Lựa chọn được lưu vào `localStorage` (`portfolio:motion`); script trong `<head>` đặt `data-motion="paused"` lên `<html>` trước khi vẽ, nên tải lại trang không thấy gì chạy rồi mới dừng. Khi đã dừng: CSS giữ yên mọi lớp `animate-*`, mắt và đèn của bot; dòng tự gõ đứng ở cụm đầu; bot không bay; khối cầu 3D không tải mà dùng bản tĩnh. Hoạt ảnh mở bảng (chat, bảng lệnh, menu) vẫn chạy vì chúng chỉ chạy một lần. Logic nằm ở [`src/lib/motion.ts`](src/lib/motion.ts).
+
 ### Font
 
 | Font                     | Dùng cho                                               | Độ đậm        |
@@ -231,7 +235,7 @@ Cách hàm hoạt động ([`server/chat.js`](server/chat.js), được [`api/ch
 
 Lưu ý về gói miễn phí của Gemini: Google ghi rõ nội dung gửi lên được dùng để cải thiện sản phẩm của họ. Vì vậy ghi chú trong bảng chat nhắc khách không nhập thông tin riêng tư.
 
-Ở lượt xem đầu tiên của mỗi phiên trình duyệt, đầu của bot bay ra từ khối cầu, lượn một vòng rồi đáp vào vòng tròn ở góc (vòng tròn đứng yên). Đường bay được sinh từ danh sách điểm trong [`scripts/bot-path.mjs`](scripts/bot-path.mjs): sửa `WAYPOINTS` rồi chạy `node scripts/bot-path.mjs && pnpm format`, đừng sửa tay các keyframe trong CSS. Người bật "giảm chuyển động" không thấy đường bay.
+Ở lượt xem đầu tiên của mỗi phiên trình duyệt, đầu của bot bay ra từ khối cầu, lượn một vòng rồi đáp vào vòng tròn ở góc (vòng tròn đứng yên). Đường bay được sinh từ danh sách điểm trong [`scripts/bot-path.mjs`](scripts/bot-path.mjs): sửa `WAYPOINTS` rồi chạy `node scripts/bot-path.mjs && pnpm format`, đừng sửa tay các keyframe trong CSS. Đường bay chỉ dùng từ 1024px, nơi hero chia hai cột; dưới mức đó khối cầu nằm dưới phần chữ nên đầu bot chỉ bật ra trong vòng tròn ở góc (`bot-pop`). Giữ `WIDE_FLIGHT` trong `Assistant.tsx` khớp với media query trong CSS. Lời chào cạnh bot tự ẩn khi khách cuộn quá 40px hoặc chạm vào chỗ khác. Người bật "giảm chuyển động" hoặc đã tạm dừng chuyển động không thấy đường bay.
 
 Thanh trạng thái chỉ lặp lại thông tin đã có ở chỗ khác (mục đang xem, phần trăm đã cuộn, giờ địa phương) nên được ẩn khỏi trình đọc màn hình và không nằm trong thứ tự Tab. Bảng lệnh thì ngược lại: đó là một hộp thoại thật, dùng được hoàn toàn bằng bàn phím, tìm được cả khi gõ tiếng Việt không dấu.
 
@@ -312,10 +316,10 @@ Vercel tự phục vụ `dist/404.html` với mã trạng thái 404 cho mọi đ
 | Hạng mục                                           | Kết quả                                                                                                                                                |
 | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `pnpm typecheck`, `pnpm lint`, `pnpm format:check` | Đạt, 0 lỗi, 0 warning                                                                                                                                  |
-| `pnpm test`                                        | 156/156 test đạt                                                                                                                                       |
+| `pnpm test`                                        | 168/168 test đạt                                                                                                                                       |
 | `pnpm build`                                       | Đạt, không warning                                                                                                                                     |
-| JS tải ban đầu                                     | 140.2 KB gzip (ngân sách 150 KB). Tải lười: chunk 3D 232.4 KB, bảng chat 3.4 KB, bảng lệnh 2.8 KB, mỗi bài viết 3.4 đến 6.5 KB, bộ đọc Markdown 1.4 KB |
-| `pnpm qa`                                          | 81/81 kiểm tra đạt, ở 6 độ rộng từ 360px đến 2560px. Phần AI của chatbot chạy với một máy chủ giả lập Gemini                                           |
+| JS tải ban đầu                                     | 141.0 KB gzip (ngân sách 150 KB). Tải lười: chunk 3D 232.4 KB, bảng chat 3.5 KB, bảng lệnh 3.0 KB, mỗi bài viết 3.4 đến 6.5 KB, bộ đọc Markdown 1.4 KB |
+| `pnpm qa`                                          | 82/82 kiểm tra đạt, ở 6 độ rộng từ 360px đến 2560px. Phần AI của chatbot chạy với một máy chủ giả lập Gemini                                           |
 | Lighthouse mobile `/en`                            | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                     |
 | Lighthouse mobile `/vi`                            | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                     |
 | Lighthouse mobile 4 trang bài viết (`/en`, `/vi`)  | Performance 100 · Accessibility 100 · Best Practices 100 · SEO 100                                                                                     |

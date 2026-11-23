@@ -54,7 +54,10 @@ export function setTheme(theme: Theme, origin?: RippleOrigin): void {
   const root = document.documentElement;
   root.style.setProperty('--ripple-x', origin ? `${origin.x}px` : '50%');
   root.style.setProperty('--ripple-y', origin ? `${origin.y}px` : '0%');
-  document.startViewTransition(() => apply(theme));
+  // Marks this transition as the theme's, so the ripple is not used between pages (styles.css).
+  root.dataset.transition = 'theme';
+  const transition = document.startViewTransition(() => apply(theme));
+  void transition.finished.finally(() => delete root.dataset.transition);
 }
 
 export function useTheme() {

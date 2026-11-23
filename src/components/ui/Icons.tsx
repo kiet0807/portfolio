@@ -160,3 +160,13 @@ export const LockIcon = (p: IconProps) => (
     <path d="M8 11V8a4 4 0 0 1 8 0v3" />
   </svg>
 );
+export const PauseIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M9 6v12M15 6v12" />
+  </svg>
+);
+export const PlayIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M8 5.5v13l10.5-6.5Z" />
+  </svg>
+);

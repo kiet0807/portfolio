@@ -3,11 +3,11 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { mockMatchMedia } from './setup';
 import { App } from '@/App';
-import { ARTICLES, articlePath, loadArticle } from '@/content/articles';
+import { ARTICLES, articlePath, findArticle, loadArticle } from '@/content/articles';
 import { allSkills, profile } from '@/data/profile';
 import { t } from '@/i18n/dictionary';
 import { STORAGE_KEYS } from '@/lib/storage';
-import { THEME_STORAGE_KEY, themeInlineScript } from '@/theme/theme-script';
+import { MOTION_STORAGE_KEY, THEME_STORAGE_KEY, themeInlineScript } from '@/theme/theme-script';
 
 function renderPage(lang: 'en' | 'vi' = 'en') {
   window.history.replaceState(null, '', `/${lang}`);
@@ -135,6 +135,19 @@ describe('profile-driven content', () => {
     profile.stats.forEach((stat, i) => {
       expect(cells[i]?.querySelectorAll('svg path').length ?? 0, stat.id).toBe(stat.trend ? 2 : 0);
     });
+  });
+
+  it('links a project card to the article written about it', () => {
+    renderPage('vi');
+    const withArticle = profile.projects.filter((project) => project.article);
+    expect(withArticle.length).toBeGreaterThan(0);
+    for (const project of withArticle) {
+      const article = findArticle(project.article);
+      expect(article, project.id).toBeDefined();
+      if (!article) continue;
+      const name = `${t('vi', 'project.article')}: ${article.title.vi}`;
+      expect(screen.getByRole('link', { name })).toHaveAttribute('href', articlePath('vi', article.slug));
+    }
   });
 
   it('links a project only where it has something public, and says so otherwise', () => {
@@ -324,6 +337,35 @@ describe('inline theme script (runs before first paint)', () => {
   it('ignores a corrupted saved value', () => {
     window.localStorage.setItem(THEME_STORAGE_KEY, 'purple');
     expect(run()).toBe('dark');
+  });
+});
+
+describe('pause motion', () => {
+  it('stops what loops by itself, remembers it, and turns it back on', async () => {
+    const user = userEvent.setup();
+    const root = document.documentElement;
+    renderPage('vi');
+    await user.click(screen.getByRole('button', { name: t('vi', 'motion.pause') }));
+    expect(root).toHaveAttribute('data-motion', 'paused');
+    expect(window.localStorage.getItem(MOTION_STORAGE_KEY)).toBe('paused');
+    await user.click(screen.getByRole('button', { name: t('vi', 'motion.resume') }));
+    expect(root).not.toHaveAttribute('data-motion');
+    expect(window.localStorage.getItem(MOTION_STORAGE_KEY)).toBeNull();
+  });
+
+  it('is restored before first paint, and then the bot does not fly in', () => {
+    const root = document.documentElement;
+    root.removeAttribute('data-motion');
+    root.removeAttribute('data-first-visit');
+    window.sessionStorage.clear();
+    window.localStorage.setItem(MOTION_STORAGE_KEY, 'paused');
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval -- evaluating our own inline script is the point of this test
+    const script = new Function(themeInlineScript) as () => void;
+    script();
+    expect(root).toHaveAttribute('data-motion', 'paused');
+    expect(root).not.toHaveAttribute('data-first-visit');
+    window.localStorage.removeItem(MOTION_STORAGE_KEY);
+    root.removeAttribute('data-motion');
   });
 });
 

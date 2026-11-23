@@ -79,6 +79,14 @@ export const ARTICLES: readonly ArticleMeta[] = [
 /** The path segment under which articles live: /en/writing/<slug>. */
 export const WRITING_SEGMENT = 'writing';
 
+/**
+ * view-transition-name shared by an article's title in the Writing list and on its own page,
+ * so that moving between the two pages carries the title across (styles.css).
+ */
+export function articleTransitionName(slug: string): string {
+  return `article-${slug}`;
+}
+
 export function articlePath(lang: Lang, slug: string): string {
   return `/${lang}/${WRITING_SEGMENT}/${slug}`;
 }

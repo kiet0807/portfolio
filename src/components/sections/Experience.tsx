@@ -2,12 +2,15 @@ import { Section } from './Section';
 import { Reveal } from '@/components/ui/Reveal';
 import { Tag } from '@/components/ui/Tag';
 import { profile } from '@/data/profile';
+import { cn } from '@/lib/cn';
 import { useLang } from '@/i18n/useLang';
 
 /**
- * Timeline. Vertical on phones and tablets; from `lg` up the jobs sit side by side
- * (newest first) under a horizontal line, so the section uses the full width.
- * Each item draws its own segment of the line, so more than three jobs simply wrap.
+ * Timeline. Vertical on phones and tablets; from `lg` up the jobs sit in two columns
+ * (newest first) under a horizontal line, so the section uses the full width. The current
+ * job, the longest, takes the whole first row with its highlights in two columns; the
+ * others pair up below, so no card stretches to the height of a much longer neighbour.
+ * Each item draws its own segment of the line, so any number of jobs simply wraps.
  */
 export function Experience() {
   const { lang, t } = useLang();
@@ -21,11 +24,14 @@ export function Experience() {
         >
           <div className="h-full w-full animate-signal bg-[linear-gradient(90deg,transparent_35%,var(--color-accent)_50%,transparent_65%)]" />
         </div>
-        <ol className="relative ml-2 space-y-8 border-l border-line sm:ml-3 lg:-mx-3 lg:grid lg:grid-cols-3 lg:space-y-0 lg:gap-y-10 lg:border-l-0 print:ml-0 print:block print:space-y-3 print:border-l-0">
-          {profile.experience.map((job) => (
+        <ol className="relative ml-2 space-y-8 border-l border-line sm:ml-3 lg:-mx-3 lg:grid lg:grid-cols-2 lg:space-y-0 lg:gap-y-10 lg:border-l-0 print:ml-0 print:block print:space-y-3 print:border-l-0">
+          {profile.experience.map((job, index) => (
             <li
               key={job.id}
-              className="relative pl-7 sm:pl-10 lg:border-t lg:border-line lg:px-3 lg:pt-10 print:border-t-0 print:p-0"
+              className={cn(
+                'relative pl-7 sm:pl-10 lg:border-t lg:border-line lg:px-3 lg:pt-10 print:border-t-0 print:p-0',
+                index === 0 && 'lg:col-span-2',
+              )}
             >
               <span
                 aria-hidden="true"
@@ -46,9 +52,17 @@ export function Experience() {
                   <h3 className="mt-1.5 text-xl font-bold">{job.role[lang]}</h3>
                   <p className="mt-0.5 font-medium">{job.company}</p>
                   <p className="mt-1 text-sm text-pretty text-muted">{job.context[lang]}</p>
-                  <ul className="mt-4 list-disc space-y-2 pl-5 marker:text-link print:mt-1 print:space-y-0">
+                  <ul
+                    className={cn(
+                      'mt-4 list-disc space-y-2 pl-5 marker:text-link print:mt-1 print:space-y-0',
+                      index === 0 && 'lg:columns-2 lg:space-y-0 lg:gap-x-12 print:columns-1',
+                    )}
+                  >
                     {job.highlights.map((h) => (
-                      <li key={h.en} className="text-pretty">
+                      <li
+                        key={h.en}
+                        className={cn('text-pretty', index === 0 && 'lg:mb-2 lg:break-inside-avoid')}
+                      >
                         {h[lang]}
                       </li>
                     ))}

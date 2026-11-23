@@ -16,6 +16,8 @@ const DURATION_MS = 1400;
  * Number that counts up the first time it scrolls into view.
  * The final value is what gets prerendered and what assistive technology reads;
  * the animation only rewrites a decorative copy, and is skipped with reduced motion.
+ * A number already on screen when the page wakes up keeps its value: the visitor has
+ * read it, and counting from zero then would look like it dropped.
  */
 export function CountUp({ value, decimals = 0, prefix = '', suffix = '' }: CountUpProps) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -32,6 +34,11 @@ export function CountUp({ value, decimals = 0, prefix = '', suffix = '' }: Count
     if (!el || !textNode) return;
     textNode.nodeValue = finalText;
     if (played.current || reduce === true || typeof IntersectionObserver === 'undefined') return;
+    const box = el.getBoundingClientRect();
+    if (box.bottom > 0 && box.top < window.innerHeight) {
+      played.current = true;
+      return;
+    }
 
     let frame = 0;
     const observer = new IntersectionObserver(

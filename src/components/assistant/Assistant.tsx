@@ -8,15 +8,22 @@ import { VISITED_STORAGE_KEY } from '@/theme/theme-script';
 // Downloaded the first time the bot is opened; never part of the initial bundle.
 const AssistantPanel = lazy(() => import('./AssistantPanel'));
 
+/** Where the first visit gets the long flight; narrower screens get a short pop (styles.css). */
+const WIDE_FLIGHT = '(min-width: 1024px)';
 /** Delay plus duration of the first-visit flight in styles.css, and a little slack. */
 const FLIGHT_MS = 5300;
+/** The same for the pop of narrow screens. */
+const POP_MS = 2100;
 /** How long Kai's greeting stays up after landing. */
 const GREETING_MS = 7000;
+/** Scrolling this far, or pressing anywhere else, puts the greeting away early. */
+const GREETING_SCROLL_PX = 40;
 
 /**
  * The guide bot in the bottom corner. On the first page view of a session its head comes
  * out of the hero's sphere, swoops across the page and lands in the ring, which waits here
- * the whole time: the flight is pure CSS, keyed on <html data-first-visit> (set before first
+ * the whole time (below 1024px, where the sphere sits under the text, it only pops up in
+ * the ring): the flight is pure CSS, keyed on <html data-first-visit> (set before first
  * paint by the inline script in <head>), and this component only remembers that it happened.
  * Pressing the ring opens Kai's chat panel (ready-made questions, plus AI answers when the
  * chat function is configured); the panel follows the button in the document, so Tab moves
@@ -25,6 +32,8 @@ const GREETING_MS = 7000;
 export function Assistant() {
   const { t } = useLang();
   const [open, setOpen] = useState(false);
+  /** The panel stays a moment after closing, to fade out the way it came in. */
+  const [leaving, setLeaving] = useState(false);
   /** Kai says hello once, right after landing from the first-visit flight. */
   const [greeting, setGreeting] = useState(false);
   const panelId = useId();
@@ -39,21 +48,56 @@ export function Assistant() {
       /* storage unavailable: the bot simply flies in again next time */
     }
     let goodbye = 0;
-    const landed = window.setTimeout(() => {
-      root.removeAttribute('data-first-visit');
-      setGreeting(true);
-      goodbye = window.setTimeout(() => setGreeting(false), GREETING_MS);
-    }, FLIGHT_MS);
+    const landed = window.setTimeout(
+      () => {
+        root.removeAttribute('data-first-visit');
+        setGreeting(true);
+        goodbye = window.setTimeout(() => setGreeting(false), GREETING_MS);
+      },
+      window.matchMedia(WIDE_FLIGHT).matches ? FLIGHT_MS : POP_MS,
+    );
     return () => {
       window.clearTimeout(landed);
       window.clearTimeout(goodbye);
     };
   }, []);
 
+  // The greeting covers part of the page on a phone: it goes as soon as the visitor moves on.
+  useEffect(() => {
+    if (!greeting) return;
+    const startY = window.scrollY;
+    const onScroll = () => {
+      if (Math.abs(window.scrollY - startY) > GREETING_SCROLL_PX) setGreeting(false);
+    };
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.target instanceof Node && !buttonRef.current?.contains(event.target)) setGreeting(false);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    document.addEventListener('pointerdown', onPointerDown);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      document.removeEventListener('pointerdown', onPointerDown);
+    };
+  }, [greeting]);
+
+  // Read by `close`, which keeps one identity so the open panel does not re-run its effects.
+  const openRef = useRef(open);
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
+
   const close = useCallback((restoreFocus: boolean) => {
+    if (openRef.current && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) setLeaving(true);
     setOpen(false);
     if (restoreFocus) buttonRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    if (!leaving) return;
+    // In case the animation never runs (a hidden tab): take the panel away anyway.
+    const timer = window.setTimeout(() => setLeaving(false), 400);
+    return () => window.clearTimeout(timer);
+  }, [leaving]);
 
   return (
     <div data-assistant="" className="fixed right-4 bottom-10 z-40 print:hidden">
@@ -65,7 +109,12 @@ export function Assistant() {
         aria-label={t(open ? 'bot.close' : 'bot.open')}
         onClick={() => {
           setGreeting(false);
-          setOpen((value) => !value);
+          if (open) {
+            close(false);
+          } else {
+            setLeaving(false);
+            setOpen(true);
+          }
         }}
         className={cn(
           'group relative grid size-12 place-items-center rounded-full border bg-surface/80 shadow-glow-ai backdrop-blur-md transition-[border-color,transform] duration-300 ease-water hover:border-ai active:scale-95 sm:size-14',
@@ -113,9 +162,9 @@ export function Assistant() {
           ···
         </span>
       </button>
-      {open ? (
+      {open || leaving ? (
         <Suspense fallback={null}>
-          <AssistantPanel id={panelId} onClose={close} />
+          <AssistantPanel id={panelId} onClose={close} leaving={!open} onLeft={() => setLeaving(false)} />
         </Suspense>
       ) : null}
     </div>

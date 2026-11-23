@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useId,
   useLayoutEffect,
@@ -15,6 +16,7 @@ import type { DictKey } from '@/i18n/dictionary';
 import type { Lang } from '@/i18n/types';
 import { useLang } from '@/i18n/useLang';
 import { cn } from '@/lib/cn';
+import { setMotionPaused, useMotionPaused } from '@/lib/motion';
 import { matchesQuery } from '@/lib/search';
 import { setTheme, THEMES, useTheme, type Theme } from '@/theme/useTheme';
 
@@ -83,6 +85,7 @@ interface CommandPaletteProps {
 export default function CommandPalette({ onClose, onSwitchLang }: CommandPaletteProps) {
   const { lang, t } = useLang();
   const { theme } = useTheme();
+  const paused = useMotionPaused();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const [query, setQuery] = useState('');
@@ -141,6 +144,15 @@ export default function CommandPalette({ onClose, onSwitchLang }: CommandPalette
         keepOpen: true,
         run: () => setTheme(item),
       })),
+      {
+        id: 'motion',
+        group: 'actions',
+        label: t(paused ? 'motion.resume' : 'motion.pause'),
+        hint: paused ? '●' : undefined,
+        keywords: 'motion animation pause stop chuyển động hiệu ứng dừng',
+        keepOpen: true,
+        run: () => setMotionPaused(!paused),
+      },
       {
         id: 'lang',
         group: 'actions',
@@ -208,7 +220,7 @@ export default function CommandPalette({ onClose, onSwitchLang }: CommandPalette
         ];
       }),
     ];
-  }, [copied, lang, theme, onSwitchLang, t]);
+  }, [copied, lang, theme, paused, onSwitchLang, t]);
 
   const visible = useMemo(
     () =>
@@ -230,12 +242,26 @@ export default function CommandPalette({ onClose, onSwitchLang }: CommandPalette
     if (option && typeof option.scrollIntoView === 'function') option.scrollIntoView({ block: 'nearest' });
   }, [active, query]);
 
-  const close = () => {
+  const close = useCallback(() => {
     const dialog = dialogRef.current;
     // close() fires the dialog's "close" event, which calls onClose.
     if (dialog?.open && typeof dialog.close === 'function') dialog.close();
     else onClose();
+  }, [onClose]);
+
+  // Dismissed (Esc, a click on the backdrop), the menu fades out the way it came in; a
+  // command closes it at once, so what the command does is not hidden behind it.
+  const [leaving, setLeaving] = useState(false);
+  const dismiss = () => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) close();
+    else setLeaving(true);
   };
+  useEffect(() => {
+    if (!leaving) return;
+    // In case the animation never runs (a hidden tab): close anyway.
+    const timer = window.setTimeout(close, 400);
+    return () => window.clearTimeout(timer);
+  }, [leaving, close]);
 
   const run = (command: Command) => {
     if (command.keepOpen) {
@@ -266,7 +292,7 @@ export default function CommandPalette({ onClose, onSwitchLang }: CommandPalette
 
   // A click on the backdrop lands on the <dialog> element itself.
   const onDialogClick = (event: MouseEvent<HTMLDialogElement>) => {
-    if (event.target === event.currentTarget) close();
+    if (event.target === event.currentTarget) dismiss();
   };
 
   const activeCommand = visible[active];
@@ -276,8 +302,16 @@ export default function CommandPalette({ onClose, onSwitchLang }: CommandPalette
       ref={dialogRef}
       aria-label={t('palette.title')}
       className="palette"
+      data-leaving={leaving ? '' : undefined}
       onClose={onClose}
+      onCancel={(event) => {
+        event.preventDefault();
+        dismiss();
+      }}
       onClick={onDialogClick}
+      onAnimationEnd={(event) => {
+        if (leaving && event.target === event.currentTarget) close();
+      }}
     >
       <div className="flex max-h-[inherit] flex-col overflow-hidden rounded-xl2 border border-line bg-surface shadow-pop">
         <div className="flex items-center gap-3 border-b border-line px-4 focus-within:border-link">

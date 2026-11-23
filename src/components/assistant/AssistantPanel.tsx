@@ -61,6 +61,10 @@ interface AssistantPanelProps {
   id: string;
   /** `restoreFocus` is true when closed from the keyboard, so focus returns to the bot. */
   onClose: (restoreFocus: boolean) => void;
+  /** Closed, and fading out: no longer the panel, nothing in it can be reached. */
+  leaving?: boolean;
+  /** Called when the fade-out has finished. */
+  onLeft?: () => void;
 }
 
 /**
@@ -71,7 +75,7 @@ interface AssistantPanelProps {
  *    the question goes. When the function fails, the chips still work.
  * Default export so React.lazy can split it into its own chunk.
  */
-export default function AssistantPanel({ id, onClose }: AssistantPanelProps) {
+export default function AssistantPanel({ id, onClose, leaving = false, onLeft }: AssistantPanelProps) {
   const { lang, t } = useLang();
   const [entries, setEntries] = useState<readonly Entry[]>([]);
   const [draft, setDraft] = useState('');
@@ -268,7 +272,12 @@ export default function AssistantPanel({ id, onClose }: AssistantPanelProps) {
       id={id}
       role="group"
       aria-label={t('bot.name')}
-      data-assistant-panel=""
+      data-assistant-panel={leaving ? undefined : ''}
+      data-leaving={leaving ? '' : undefined}
+      inert={leaving}
+      onAnimationEnd={(event) => {
+        if (leaving && event.target === event.currentTarget) onLeft?.();
+      }}
       data-ai={ai === null ? 'checking' : ai ? 'on' : 'off'}
       className="bot-panel absolute right-0 bottom-full mb-3 flex max-h-[min(36rem,calc(100dvh-8.5rem))] w-[min(23rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-3xl border border-line bg-surface/90 shadow-pop backdrop-blur-xl"
     >

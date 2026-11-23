@@ -1,6 +1,7 @@
 import { useReducedMotion } from 'motion/react';
 import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/cn';
+import { useMotionPaused } from '@/lib/motion';
 
 interface TypewriterProps {
   /** Phrases typed one after another. The first one is what gets prerendered. */
@@ -19,11 +20,13 @@ const START_MS = 2600;
  * Terminal-style line that types the phrases in a loop.
  * Progressive enhancement: the HTML already contains the first phrase, screen readers
  * get the whole list once, and the animation only rewrites a decorative text node
- * (no React re-renders). It rests while off screen, and never starts with reduced motion.
+ * (no React re-renders). It rests while off screen, and never starts with reduced motion;
+ * with motion paused on the page it stops on the first phrase.
  */
 export function Typewriter({ phrases, label, className }: TypewriterProps) {
   const ref = useRef<HTMLSpanElement>(null);
   const reduce = useReducedMotion();
+  const paused = useMotionPaused();
   const first = phrases[0] ?? '';
 
   useEffect(() => {
@@ -31,7 +34,7 @@ export function Typewriter({ phrases, label, className }: TypewriterProps) {
     const node = el?.firstChild;
     if (!el || !node) return;
     node.nodeValue = first;
-    if (reduce === true || phrases.length < 2) return;
+    if (reduce === true || paused || phrases.length < 2) return;
 
     let timer = 0;
     let index = 0;
@@ -74,7 +77,7 @@ export function Typewriter({ phrases, label, className }: TypewriterProps) {
       window.clearTimeout(timer);
       io?.disconnect();
     };
-  }, [phrases, first, reduce]);
+  }, [phrases, first, reduce, paused]);
 
   return (
     <p className={cn('font-mono text-sm sm:text-base', className)}>

@@ -7,7 +7,7 @@ import { SkipLink } from '@/components/layout/SkipLink';
 import { ButtonLink } from '@/components/ui/Button';
 import { ArrowRightIcon, DownloadIcon, MailIcon } from '@/components/ui/Icons';
 import { Tag } from '@/components/ui/Tag';
-import type { Article } from '@/content/articles';
+import { articleTransitionName, type Article } from '@/content/articles';
 import { profile } from '@/data/profile';
 import { useActiveSection } from '@/hooks/useActiveSection';
 import { useSpotlight } from '@/hooks/useSpotlight';
@@ -129,6 +129,7 @@ export function ArticlePage({ article }: { article: Article }) {
 
                   <h1
                     id="article-title"
+                    style={{ viewTransitionName: articleTransitionName(meta.slug) }}
                     className="mt-5 text-4xl leading-[1.08] font-light tracking-tight text-balance sm:text-5xl lg:text-[3.5rem]"
                   >
                     {meta.title[lang]}
