@@ -134,6 +134,9 @@ h3 { font-size: 1.08rem; font-weight: 700; break-after: avoid; }
 /* A role is never split between two sheets. */
 .job { display: grid; grid-template-columns: 25mm minmax(0, 1fr); column-gap: 4mm; break-inside: avoid; }
 .job + .job { margin-top: 3.6mm; }
+/* Page 1 is the person and their experience, page 2 the projects, skills and education: no role ever
+   starts the second page without its heading. The print loop shrinks the text until this holds. */
+.experience { break-after: page; }
 .when { font-size: 0.8rem; color: var(--link); padding-top: 0.5mm; }
 .company { font-weight: 500; }
 .context { font-size: 0.88rem; color: var(--muted); margin-top: 0.4mm; }
@@ -254,7 +257,7 @@ export function renderCv({ profile, lang, t, fontUrl, avatarUrl, siteUrl, phone 
         <div>
           <h3>${say(job.role)} <span class="company">· ${esc(job.company)}</span></h3>
           <p class="context">${say(job.context)}</p>
-          <ul class="bullets">${job.highlights.map((line) => `<li>${say(line)}</li>`).join('')}</ul>
+          ${job.cvBrief ? '' : `<ul class="bullets">${job.highlights.map((line) => `<li>${say(line)}</li>`).join('')}</ul>`}
           <p class="stack mono">${job.stack.map(esc).join(' · ')}</p>
         </div>
       </article>`,
@@ -359,7 +362,7 @@ ${STYLES}
 </header>
 <main>
   <section class="summary">${heading(labels.profile)}${summary}</section>
-  <section>${heading(t('section.experience'))}${jobs}</section>
+  <section class="experience">${heading(t('section.experience'))}${jobs}</section>
   <section>${heading(t('section.projects'))}<div class="projects">${rows}${projects}</div></section>
   <section>${heading(labels.ai)}${aiPanel}</section>
   <div class="split">

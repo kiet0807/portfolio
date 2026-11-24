@@ -27,6 +27,11 @@ export interface ExperienceItem {
   readonly endYear: number | null;
   readonly highlights: readonly Localized[];
   readonly stack: readonly string[];
+  /**
+   * On the printed CV, show the context and stack only, without the highlights: for an early role,
+   * so that the whole Experience section fits on the first page. The website shows every highlight.
+   */
+  readonly cvBrief?: boolean;
 }
 
 /** A number with a caption, e.g. "120 ms" + "p95 from event to pixel". */
@@ -729,6 +734,7 @@ export const profile: Profile = {
         },
       ],
       stack: ['Next.js', 'TypeScript', 'Theme UI', 'Strapi', 'MongoDB'],
+      cvBrief: true,
     },
   ],
   credentials: [
