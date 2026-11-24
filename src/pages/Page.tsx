@@ -4,6 +4,7 @@ import { Hero } from '@/components/hero/Hero';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import { SectionRail } from '@/components/layout/SectionRail';
+import { OrderFlowBackdrop } from '@/components/layout/OrderFlowBackdrop';
 import { HAS_WRITING, SECTION_IDS, TOP_ID } from '@/components/layout/sections';
 import { SkipLink } from '@/components/layout/SkipLink';
 import { StatusBar } from '@/components/layout/StatusBar';
@@ -36,6 +37,7 @@ export function Page() {
       <main id="main" tabIndex={-1} className="relative isolate outline-none">
         {/* Night sky behind every section; it drifts a little as the page scrolls (styles.css). */}
         <div aria-hidden="true" className="starfield print:hidden forced-colors:hidden" />
+        <OrderFlowBackdrop />
         <Hero />
         <TechMarquee />
         <About />

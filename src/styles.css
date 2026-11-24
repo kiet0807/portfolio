@@ -313,6 +313,8 @@
   --line: rgb(184 204 232 / 0.16);
   /* Wash of the tinted sections: --surface at 45 %, so a card (--surface) still stands out from it. */
   --tint: rgb(14 30 56 / 0.45);
+  /* Strength of the order-flow drawing behind the sections. */
+  --flow-alpha: 0.3;
   --grad-text: linear-gradient(100deg, #60a5fa 0%, #22d3ee 55%, #a5f3fc 100%);
   --spot: rgb(34 211 238 / 0.13);
   --grid-line: rgb(96 165 250 / 0.075);
@@ -341,6 +343,7 @@
   --glow: rgb(37 99 235 / 0.11);
   --line: rgb(11 31 58 / 0.14);
   --tint: rgb(238 243 249 / 0.5);
+  --flow-alpha: 0.2;
   --grad-text: linear-gradient(100deg, #1d4ed8 0%, #0e7490 60%, #2563eb 100%);
   --spot: rgb(37 99 235 / 0.1);
   --grid-line: rgb(37 99 235 / 0.09);
@@ -557,6 +560,27 @@
   to {
     transform: translateY(-40vh);
   }
+}
+
+/*
+ * The hero's order network, drawn flat behind the sections (OrderFlowBackdrop.tsx): above the
+ * stars, under every section. Its frame loop sets the pose from the scroll; nothing here animates.
+ */
+.order-flow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 480px;
+  height: 480px;
+  color: var(--link);
+  opacity: calc(var(--stage-alpha) * var(--flow-alpha));
+  pointer-events: none;
+  will-change: transform;
+}
+.order-flow [data-core] {
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 /* ------------------------------------------------------------------ */
