@@ -237,7 +237,7 @@ export function HeroVisual() {
           style={{
             borderRadius: '58% 42% 55% 45% / 48% 56% 44% 52%',
             background: 'radial-gradient(circle, #2563eb 0%, #1d4ed8 55%, #0b1f3a 100%)',
-            boxShadow: 'inset 0 0 44px rgb(10 15 26 / 0.5), 0 0 60px -12px rgb(34 211 238 / 0.55)',
+            boxShadow: 'inset 0 0 44px rgb(8 17 34 / 0.5), 0 0 60px -12px rgb(34 211 238 / 0.55)',
           }}
         />
         <div
@@ -252,7 +252,7 @@ export function HeroVisual() {
           className="absolute inset-[7%] rounded-full"
           style={{
             background:
-              'radial-gradient(circle at 30% 24%, rgb(207 250 254 / 0.95) 0%, rgb(34 211 238 / 0.5) 14%, rgb(34 211 238 / 0) 42%), radial-gradient(circle at 74% 80%, rgb(10 15 26 / 0.4) 0%, rgb(10 15 26 / 0) 46%)',
+              'radial-gradient(circle at 30% 24%, rgb(207 250 254 / 0.95) 0%, rgb(34 211 238 / 0.5) 14%, rgb(34 211 238 / 0) 42%), radial-gradient(circle at 74% 80%, rgb(8 17 34 / 0.4) 0%, rgb(8 17 34 / 0) 46%)',
           }}
         />
       </div>

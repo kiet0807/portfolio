@@ -22,6 +22,6 @@ export const VISITED_STORAGE_KEY = 'portfolio:visited';
 export const MOTION_STORAGE_KEY = 'portfolio:motion';
 
 /** Browser UI colour (address bar) per theme; matches the page background. */
-export const THEME_COLOR = { dark: '#0a0f1a', light: '#f8fafc' } as const;
+export const THEME_COLOR = { dark: '#081122', light: '#f8fafc' } as const;
 
 export const themeInlineScript = `(function(){var d=document.documentElement,t='dark';try{if(localStorage.getItem('${THEME_STORAGE_KEY}')==='light')t='light'}catch(e){}d.setAttribute('data-theme',t);if(t==='light'){var c=document.querySelector('meta[name="theme-color"]');if(c)c.setAttribute('content','${THEME_COLOR.light}')}var m=false;try{m=localStorage.getItem('${MOTION_STORAGE_KEY}')==='paused'}catch(e){}if(m)d.setAttribute('data-motion','paused');try{if(!m&&!sessionStorage.getItem('${VISITED_STORAGE_KEY}')&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches)d.setAttribute('data-first-visit','')}catch(e){}})();`;

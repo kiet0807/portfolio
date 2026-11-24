@@ -142,7 +142,7 @@ ${LANGS.map((lang) => `    <link rel="alternate" hreflang="${lang}" href="${site
     <script>${redirectInlineScript}</script>
     <noscript><meta http-equiv="refresh" content="0; url=/en" /></noscript>
     <style>
-      body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #0a0f1a; color: #e6edf5; font: 16px/1.5 system-ui, sans-serif; }
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #081122; color: #e6edf5; font: 16px/1.5 system-ui, sans-serif; }
       a { color: #22d3ee; }
     </style>
   </head>

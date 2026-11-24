@@ -12,7 +12,7 @@ export function Testimonials() {
   return (
     <section
       aria-labelledby="testimonials-title"
-      className="relative isolate overflow-hidden bg-surface-2/50 py-16 sm:py-20 print:hidden"
+      className="relative isolate overflow-hidden bg-tint py-16 sm:py-20 print:hidden"
     >
       <div
         aria-hidden="true"

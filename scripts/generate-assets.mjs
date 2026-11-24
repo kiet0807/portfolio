@@ -35,7 +35,7 @@ const ACCENT_SRC = fromRoot('node_modules/@fontsource/playfair-display/files');
 const accentFile = (subset) => `playfair-display-${subset}-400-italic.woff2`;
 
 const COLORS = {
-  bg: '#0A0F1A',
+  bg: '#081122',
   navy: '#0B1F3A',
   primary: '#2563EB',
   accent: '#22D3EE',

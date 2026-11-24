@@ -29,6 +29,19 @@ const primaryHover = token(theme, 'color-primary-hover');
 
 const AA_TEXT = 4.5;
 const AA_UI = 3;
+/** Smallest luminance step between two stacked surfaces that still reads as two layers. */
+const LAYER_STEP = 1.06;
+
+/** A `--name: rgb(r g b / a)` token painted over an opaque hex colour, as a hex colour. */
+function over(source: string, name: string, base: string): string {
+  const match = new RegExp(`--${name}:\\s*rgb\\((\\d+) (\\d+) (\\d+) / ([\\d.]+)\\)`).exec(source);
+  if (!match) throw new Error(`Token --${name} not found (or not rgb(r g b / a))`);
+  const [r, g, b, a] = match.slice(1).map(Number) as [number, number, number, number];
+  const n = Number.parseInt(base.slice(1), 16);
+  const mix = (top: number, bottom: number) => Math.round(top * a + bottom * (1 - a));
+  const rgb = [mix(r, (n >> 16) & 255), mix(g, (n >> 8) & 255), mix(b, n & 255)];
+  return `#${rgb.map((c) => c.toString(16).padStart(2, '0')).join('')}`;
+}
 
 describe.each(Object.entries(themes))('%s theme contrast (WCAG AA)', (_name, source) => {
   const backgrounds = ['bg', 'surface', 'surface-2'] as const;
@@ -48,6 +61,12 @@ describe.each(Object.entries(themes))('%s theme contrast (WCAG AA)', (_name, sou
   });
   it('focus ring against the page background', () => {
     expect(contrastRatio(token(source, 'link'), token(source, 'bg'))).toBeGreaterThanOrEqual(AA_UI);
+  });
+  // Skills, Projects and Testimonials lay --tint over the page; their cards must not melt into it.
+  // (Before 2026-11-24 the dark wash was --surface-2 at 50 %, 1.04:1 against the cards: only the border showed.)
+  it('cards stand out from a tinted section', () => {
+    const tinted = over(source, 'tint', token(source, 'bg'));
+    expect(contrastRatio(token(source, 'surface'), tinted)).toBeGreaterThanOrEqual(LAYER_STEP);
   });
 });
 

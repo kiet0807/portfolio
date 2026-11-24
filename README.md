@@ -318,7 +318,7 @@ Vercel tự phục vụ `dist/404.html` với mã trạng thái 404 cho mọi đ
 | Hạng mục                                           | Kết quả                                                                                                                                              |
 | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pnpm typecheck`, `pnpm lint`, `pnpm format:check` | Đạt, 0 lỗi, 0 warning                                                                                                                                |
-| `pnpm test`                                        | 177/177 test đạt                                                                                                                                     |
+| `pnpm test`                                        | 179/179 test đạt                                                                                                                                     |
 | `pnpm build`                                       | Đạt, không warning                                                                                                                                   |
 | JS tải ban đầu                                     | 141.2 KB gzip (ngân sách 150 KB). Tải lười: chunk 3D 235 KB, bảng chat 3.5 KB, bảng lệnh 3.0 KB, mỗi bài viết 3.4 đến 6.5 KB, bộ đọc Markdown 1.4 KB |
 | `pnpm qa`                                          | 87/87 kiểm tra đạt, ở 7 độ rộng từ 320px đến 2560px. Phần AI của chatbot chạy với một máy chủ giả lập Gemini                                         |

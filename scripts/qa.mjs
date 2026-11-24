@@ -575,7 +575,7 @@ await check('theme button toggles Dark and Light, persists, and ignores the OS s
       theme: 'dark',
       mode: null,
       stored: null,
-      bg: 'rgb(10, 15, 26)',
+      bg: 'rgb(8, 17, 34)',
       label: 'Theme: Dark. Switch to: Light',
       icons: 1,
       choices: 2,
@@ -592,8 +592,8 @@ await check('theme button toggles Dark and Light, persists, and ignores the OS s
     expectState(await state(), { theme: 'light', label: 'Theme: Light. Switch to: Dark' });
     expectState(await toggleTo('dark'), {
       stored: 'dark',
-      bg: 'rgb(10, 15, 26)',
-      themeColor: '#0a0f1a',
+      bg: 'rgb(8, 17, 34)',
+      themeColor: '#081122',
       label: 'Theme: Dark. Switch to: Light',
       icons: 1,
     });

@@ -23,7 +23,7 @@ export function Section({ id, kicker, title, tinted = false, className, children
       aria-labelledby={headingId}
       className={cn(
         'relative isolate overflow-hidden py-20 sm:py-28 print:py-3',
-        tinted && 'bg-surface-2/50',
+        tinted && 'bg-tint',
         className,
       )}
     >

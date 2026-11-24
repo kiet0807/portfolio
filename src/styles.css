@@ -287,6 +287,7 @@
   --color-fg: var(--fg);
   --color-muted: var(--muted);
   --color-line: var(--line);
+  --color-tint: var(--tint);
   --color-link: var(--link);
   /* Second accent, kept for what is about AI: the hero badge, the workflow block, Kai. */
   --color-ai: var(--ai);
@@ -300,16 +301,18 @@
 :root,
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #0a0f1a;
-  --surface: #0f1e36;
-  --surface-2: #122543;
+  --bg: #081122;
+  --surface: #0e1e38;
+  --surface-2: #152c50;
   --fg: #e6edf5;
   --muted: #a3b1c2;
   --link: #22d3ee;
   --ai: #a78bfa;
   --grad-ai: linear-gradient(100deg, #a78bfa 0%, #60a5fa 55%, #22d3ee 100%);
   --glow: rgb(37 99 235 / 0.16);
-  --line: rgb(192 199 209 / 0.16);
+  --line: rgb(184 204 232 / 0.16);
+  /* Wash of the tinted sections: --surface at 45 %, so a card (--surface) still stands out from it. */
+  --tint: rgb(14 30 56 / 0.45);
   --grad-text: linear-gradient(100deg, #60a5fa 0%, #22d3ee 55%, #a5f3fc 100%);
   --spot: rgb(34 211 238 / 0.13);
   --grid-line: rgb(96 165 250 / 0.075);
@@ -322,7 +325,7 @@
   --hero-bg:
     radial-gradient(60% 50% at 72% 22%, rgb(37 99 235 / 0.42), transparent 70%),
     radial-gradient(42% 42% at 18% 82%, rgb(34 211 238 / 0.2), transparent 70%),
-    linear-gradient(160deg, #0b1f3a 0%, #0a0f1a 62%);
+    linear-gradient(160deg, #0b1f3a 0%, #081122 62%);
 }
 
 :root[data-theme='light'] {
@@ -337,6 +340,7 @@
   --grad-ai: linear-gradient(100deg, #6d28d9 0%, #4f46e5 55%, #0e7490 100%);
   --glow: rgb(37 99 235 / 0.11);
   --line: rgb(11 31 58 / 0.14);
+  --tint: rgb(238 243 249 / 0.5);
   --grad-text: linear-gradient(100deg, #1d4ed8 0%, #0e7490 60%, #2563eb 100%);
   --spot: rgb(37 99 235 / 0.1);
   --grid-line: rgb(37 99 235 / 0.09);
@@ -1273,6 +1277,7 @@ dialog.palette::backdrop {
     --muted: #3d4a5c;
     --link: #0b5f77;
     --line: rgb(11 31 58 / 0.28);
+    --tint: transparent;
     --hero-bg: none;
   }
   html {
